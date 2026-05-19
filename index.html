@@ -301,4 +301,229 @@
     initField(); updateUI(); draw();
 </script>
 </body>
+</html>        }
+    </style>
+</head>
+<body>
+
+<div id="rotate-screen">
+    <div style="font-size: 50px;">🔄</div>
+    <p>GIRA TU DISPOSITIVO</p>
+</div>
+
+<div id="splash-screen">
+    <div style="font-size: 12px; letter-spacing: 2px;">BIENVENIDOS A</div>
+    <h1 style="color:var(--gold); margin:10px 0;">ENTRENA CONSULTING SAS</h1>
+    <p style="margin-bottom:20px;">Expertos en SST</p>
+    <button class="btn" onclick="startGame()">INICIAR DUELO</button>
+</div>
+
+<div class="game-container">
+    <div class="ui-top">
+        <div id="turnText" class="stat-box turn p1-active">Turno: J1</div>
+        <div class="stat-box" style="color:var(--gold)">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
+        <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="520"></canvas>
+
+    <div id="winnerVignette">
+        <h2 id="winnerText" style="color:var(--gold)"></h2>
+        <p>Entrena Consulting SAS</p>
+        <button class="btn" onclick="location.reload()">REINICIAR</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = 800, H = 520;
+
+    const PHYSICS = { friction: 0.988, wallBounce: 0.6, pinBounce: 0.82, powerMult: 0.16 };
+    let score = [0, 0], currentPlayer = 1, timeLeft = 60, isMoving = false, isDragging = false;
+    let gameActive = false, dragCurrent = {x:0,y:0}, timerInterval;
+
+    let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
+    const pins = [];
+    const PIN_RADIUS = 8;
+
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        let cx = e.touches ? e.touches[0].clientX : e.clientX;
+        let cy = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: (cx - rect.left) * (W / rect.width),
+            y: (cy - rect.top) * (H / rect.height)
+        };
+    }
+
+    function initField() {
+        const createFormation = (dir) => {
+            const baseX = dir === 1 ? W * 0.1 : W * 0.9;
+            const s = dir === 1 ? 75 : -75;
+            pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); 
+            [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s, y: H*p }));
+            [0.3, 0.5, 0.7].forEach(p => pins.push({ x: baseX + s*2.5, y: H*p }));
+            pins.push({ x: baseX + s*3.8, y: H/2 });
+            [0.38, 0.62].forEach(p => pins.push({ x: baseX + s*5.2, y: H*p }));
+        };
+        createFormation(1); createFormation(-1);
+    }
+
+    function drawMarble(b) {
+        ctx.save(); ctx.translate(b.x, b.y);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath();
+        ctx.arc(b.vx, b.vy + 5, b.radius, 0, Math.PI*2); ctx.fill();
+
+        ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2);
+        let g = ctx.createRadialGradient(-3, -3, 0, 0, 0, b.radius);
+        g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#b2dfdb');
+        ctx.fillStyle = g; ctx.fill();
+
+        ctx.rotate(b.angle);
+        const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
+        tricolor.forEach((col, i) => {
+            ctx.save(); ctx.rotate((Math.PI * 2 / 3) * i);
+            ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(b.radius * 0.8, -b.radius * 0.5, b.radius * 0.8, b.radius * 0.5, 0, 0);
+            ctx.fill(); ctx.restore();
+        });
+
+        ctx.restore(); ctx.save(); ctx.translate(b.x, b.y);
+        let shine = ctx.createRadialGradient(-b.radius/2.5, -b.radius/2.5, 1, 0, 0, b.radius);
+        shine.addColorStop(0, 'rgba(255,255,255,0.8)'); shine.addColorStop(1, 'rgba(0,0,0,0.05)');
+        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+
+    function update() {
+        if (!gameActive) return;
+        if (isMoving) {
+            const speed = Math.hypot(ball.vx, ball.vy);
+            ball.angle += speed * 0.08;
+            ball.x += ball.vx; ball.y += ball.vy;
+            ball.vx *= PHYSICS.friction; ball.vy *= PHYSICS.friction;
+
+            if (ball.y < ball.radius || ball.y > H - ball.radius) {
+                ball.vy *= -PHYSICS.wallBounce; ball.y = ball.y < ball.radius ? ball.radius : H-ball.radius;
+            }
+            
+            if (ball.x < 25 || ball.x > W - 25) {
+                if (ball.y > H/2 - 60 && ball.y < H/2 + 60) {
+                    if (ball.x < W/2) { score[1]++; currentPlayer = 1; } 
+                    else { score[0]++; currentPlayer = 2; }
+                    resetBallPosition(); return;
+                } else {
+                    ball.vx *= -PHYSICS.wallBounce; ball.x = ball.x < 25 ? 25 : W-25;
+                }
+            }
+
+            pins.forEach(p => {
+                const dx = ball.x - p.x, dy = ball.y - p.y, d = Math.hypot(dx, dy);
+                if (d < ball.radius + PIN_RADIUS) {
+                    const ang = Math.atan2(dy, dx), s = Math.hypot(ball.vx, ball.vy);
+                    ball.vx = Math.cos(ang) * s * PHYSICS.pinBounce;
+                    ball.vy = Math.sin(ang) * s * PHYSICS.pinBounce;
+                    ball.x = p.x + Math.cos(ang) * (ball.radius + PIN_RADIUS + 1);
+                }
+            });
+
+            if (speed < 0.2) { 
+                isMoving = false; 
+                currentPlayer = (currentPlayer === 1) ? 2 : 1; 
+                updateUI(); 
+            }
+        }
+    }
+
+    function draw() {
+        ctx.fillStyle = '#5d4037'; ctx.fillRect(0, 0, W, H);
+        
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 2;
+        ctx.strokeRect(15, 15, W-30, H-30);
+        ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.textAlign = 'center';
+        ctx.font = 'bold 26px Arial'; ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 45); 
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText('JUGADOR 1', W*0.25, 60); ctx.fillText('JUGADOR 2', W*0.75, 60);
+
+        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
+        ctx.strokeRect(-10, H/2-60, 35, 120); ctx.strokeRect(W-25, H/2-60, 35, 120);
+
+        pins.forEach(p => {
+            ctx.fillStyle = '#212121'; ctx.beginPath(); ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2); ctx.fill();
+        });
+
+        if (isDragging) {
+            ctx.beginPath(); ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)'; 
+            ctx.setLineDash([5,5]); ctx.lineWidth = 3;
+            ctx.moveTo(ball.x, ball.y); 
+            ctx.lineTo(ball.x + (ball.x - dragCurrent.x), ball.y + (ball.y - dragCurrent.y));
+            ctx.stroke(); ctx.setLineDash([]);
+        }
+
+        drawMarble(ball); update(); requestAnimationFrame(draw);
+    }
+
+    function startGame() {
+        document.getElementById('splash-screen').style.display = 'none';
+        gameActive = true; startTimer();
+    }
+
+    function startTimer() {
+        if(timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            timeLeft--; document.getElementById('timer').innerText = timeLeft;
+            if (timeLeft <= 0) endGame();
+        }, 1000);
+    }
+
+    function resetBallPosition() {
+        isMoving = false; ball.vx = 0; ball.vy = 0;
+        ball.x = currentPlayer === 1 ? 65 : W - 65; ball.y = H/2;
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('score1').innerText = score[0];
+        document.getElementById('score2').innerText = score[1];
+        const t = document.getElementById('turnText');
+        t.innerText = `Turno: J${currentPlayer}`;
+        t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
+    }
+
+    function endGame() {
+        gameActive = false; clearInterval(timerInterval);
+        const vig = document.getElementById('winnerVignette');
+        let win = score[0] > score[1] ? "¡VICTORIA J1!" : (score[1] > score[0] ? "¡VICTORIA J2!" : "¡EMPATE!");
+        document.getElementById('winnerText').innerText = win;
+        vig.style.display = 'flex';
+    }
+
+    function handleDown(e) { 
+        if(isMoving || !gameActive) return; 
+        let c = getCoords(e);
+        if(Math.hypot(c.x - ball.x, c.y - ball.y) < 55) { isDragging = true; dragCurrent = c; } 
+    }
+    function handleMove(e) { if(isDragging) { dragCurrent = getCoords(e); e.preventDefault(); } }
+    function handleUp() { 
+        if(!isDragging) return; 
+        ball.vx = (ball.x - dragCurrent.x) * PHYSICS.powerMult; 
+        ball.vy = (ball.y - dragCurrent.y) * PHYSICS.powerMult; 
+        isDragging = false; isMoving = true; 
+    }
+
+    canvas.addEventListener('mousedown', handleDown);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    canvas.addEventListener('touchstart', handleDown, {passive:false});
+    window.addEventListener('touchmove', handleMove, {passive:false});
+    window.addEventListener('touchend', handleUp);
+
+    initField(); updateUI(); draw();
+</script>
+</body>
 </html>
