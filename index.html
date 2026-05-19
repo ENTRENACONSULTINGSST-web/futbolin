@@ -2,47 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Futbolín Tricolor - Entrena Consulting SAS</title>
+
+    <!-- SOLUCIÓN ERROR 404: Se eliminó la línea de og:image que causaba el error si el archivo no existía -->
+    <meta property="og:title" content="Futbolín Tricolor - Entrena Consulting SAS">
+    <meta property="og:description" content="¡Duelo de canicas! Expertos en SST.">
+    <meta property="og:url" content="https://entrenaconsultingsst-web.github.io/futbolin/">
 
     <style>
         :root { --p1: #d32f2f; --p2: #1976d2; --gold: #fbc02d; }
         * { user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         
         body {
-            background: #121212; margin: 0; padding: 0;
-            display: flex; justify-content: center; align-items: center;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            min-height: 100vh;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
+            background: #121212; margin: 0; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Segoe UI', Arial, sans-serif; height: 100vh;
         }
 
-        /* Overlay de rotación SUGERENCIA */
-        #rotate-overlay {
+        /* SOLUCIÓN ROTACIÓN: Overlay removible con un clic si el usuario lo desea */
+        #rotate-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 3000;
-            flex-direction: column; justify-content: center; align-items: center;
-            color: white; text-align: center;
+            background: rgba(26, 26, 26, 0.95); color: white; z-index: 3000;
+            flex-direction: column; justify-content: center; align-items: center; cursor: pointer;
         }
-        
-        #rotate-overlay button {
-            margin-top: 20px; padding: 12px 24px;
-            background: var(--gold); border: none; border-radius: 30px;
-            font-weight: bold; cursor: pointer;
-        }
-
-        @media (orientation: portrait) {
-            #rotate-overlay { display: flex; }
-            .game-wrapper { filter: blur(2px); pointer-events: none; }
-        }
-        
-        @media (orientation: landscape) {
-            #rotate-overlay { display: none !important; }
-            .game-wrapper { filter: none !important; pointer-events: auto !important; }
-        }
+        @media (orientation: portrait) { #rotate-screen { display: flex; } }
 
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -51,179 +35,80 @@
             justify-content: center; align-items: center; text-align: center;
         }
 
-        .game-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #0a0a0a;
-        }
-
         .game-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            width: 95%;
-            max-width: 95%;
-            height: 95%;
-            max-height: 95%;
-            background: #3e2723;
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            border: 4px solid #2d1b18;
+            position: relative; display: flex; flex-direction: column;
+            width: 95vw; max-width: 820px; max-height: 98vh;
+            background: #3e2723; padding: 8px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 4px solid #2d1b18;
         }
 
         .ui-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            color: #fff;
-            width: 100%;
-            flex-shrink: 0;
-            gap: 10px;
-            padding: 0 5px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 6px; color: #fff; width: 100%; flex-shrink: 0;
         }
 
         .stat-box {
-            background: #2d1b18;
-            padding: 8px 15px;
-            border-radius: 15px;
-            font-weight: bold;
-            border: 1px solid #5d4037;
-            font-size: clamp(14px, 2vh, 18px);
-            text-align: center;
-            white-space: nowrap;
+            background: #2d1b18; padding: 4px 12px; border-radius: 15px;
+            font-weight: bold; border: 1px solid #5d4037; font-size: clamp(10px, 2.5vh, 14px);
         }
 
-        .turn {
-            transition: 0.3s;
-            min-width: 100px;
-        }
-        
+        .turn { transition: 0.3s; }
         .p1-active { background: var(--p1); box-shadow: 0 0 10px var(--p1); }
         .p2-active { background: var(--p2); box-shadow: 0 0 10px var(--p2); }
 
-        .canvas-wrapper {
-            flex: 1;
-            position: relative;
-            min-height: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #2a1a15;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
         canvas {
-            display: block;
-            background: #bcaaa4;
-            border-radius: 5px;
-            touch-action: none;
-            cursor: crosshair;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+            display: block; background: #bcaaa4; border-radius: 5px;
+            cursor: crosshair; touch-action: none; 
+            width: 100%; height: auto; max-height: 72vh;
+            object-fit: contain; aspect-ratio: 800 / 520;
         }
-
-        .control-bar {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-            flex-shrink: 0;
-        }
-
-        .btn {
-            padding: 8px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 30px;
-            border: none;
-            background: var(--gold);
-            color: #000;
-            transition: transform 0.1s;
-            font-family: inherit;
-        }
-        
-        .btn:active { transform: scale(0.96); }
 
         #winnerVignette {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 100;
-            border-radius: 10px;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 100; border-radius: 10px;
+            flex-direction: column; justify-content: center; align-items: center; color: white;
         }
         
-        @media (max-width: 768px) {
-            .stat-box { padding: 5px 10px; font-size: 12px; }
-            .turn { min-width: 80px; }
-            .btn { padding: 6px 15px; font-size: 12px; }
-            .control-bar { gap: 8px; }
+        .btn {
+            padding: 10px 20px; font-size: 16px; font-weight: bold; cursor: pointer;
+            border-radius: 30px; border: none; background: var(--gold); color: #000; margin-top: 10px;
         }
-        
-        @media (max-height: 400px) {
-            .stat-box { padding: 3px 8px; font-size: 11px; }
-            .turn { min-width: 70px; }
-            .control-bar { margin-top: 4px; }
-            .btn { padding: 4px 12px; font-size: 11px; }
-        }
+
+        /* Botón de pantalla completa sutil */
+        #fs-btn { position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 5px; padding: 5px; font-size: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<!-- Overlay NO BLOQUEANTE de rotación -->
-<div id="rotate-overlay">
+<div id="rotate-screen" onclick="this.style.display='none'">
     <div style="font-size: 50px;">🔄</div>
-    <p style="margin: 10px;">GIRA tu dispositivo para mejor experiencia</p>
-    <button id="closeRotateBtn">CONTINUAR ASÍ</button>
+    <p>GIRA TU DISPOSITIVO</p>
+    <small>(Toca para ignorar)</small>
 </div>
 
 <div id="splash-screen">
     <div style="font-size: 12px; letter-spacing: 2px;">BIENVENIDOS A</div>
-    <h1 style="color:var(--gold); margin:10px 0; font-size: clamp(20px, 6vw, 32px);">ENTRENA CONSULTING SAS</h1>
-    <p style="margin-bottom:20px;">Expertos en SST</p>
-    <button class="btn" id="startBtn">INICIAR DUELO</button>
+    <h1 style="color:var(--gold); margin:10px 0;">ENTRENA CONSULTING SAS</h1>
+    <p>Expertos en SST</p>
+    <button class="btn" onclick="startGame()">INICIAR DUELO</button>
 </div>
 
-<div class="game-wrapper">
-    <div class="game-container">
-        <div class="ui-top">
-            <div id="turnText" class="stat-box turn p1-active">Turno: J1</div>
-            <div class="stat-box" style="color:var(--gold)">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
-            <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
-        </div>
+<div class="game-container" id="main-container">
+    <div class="ui-top">
+        <div id="turnText" class="stat-box turn p1-active">Turno: J1</div>
+        <div class="stat-box" style="color:var(--gold)">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
+        <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
+    </div>
 
-        <div class="canvas-wrapper">
-            <canvas id="gameCanvas" width="800" height="520"></canvas>
-        </div>
+    <canvas id="gameCanvas" width="800" height="520"></canvas>
+    
+    <!-- SOLUCIÓN PANTALLA COMPLETA: Botón adicional y función JS -->
+    <button id="fs-btn" onclick="toggleFS()">PANTALLA COMPLETA</button>
 
-        <div class="control-bar">
-            <button class="btn" id="fullscreenBtn">⛶ Pantalla completa</button>
-            <button class="btn" id="resetGameBtn">🔄 Reiniciar</button>
-        </div>
-
-        <div id="winnerVignette">
-            <h2 id="winnerText" style="color:var(--gold); font-size: clamp(24px, 5vh, 40px);"></h2>
-            <p>Entrena Consulting SAS</p>
-            <button class="btn" onclick="location.reload()">JUGAR DE NUEVO</button>
-        </div>
+    <div id="winnerVignette">
+        <h2 id="winnerText" style="color:var(--gold)"></h2>
+        <p>Entrena Consulting SAS</p>
+        <button class="btn" onclick="location.reload()">REINICIAR</button>
     </div>
 </div>
 
@@ -232,41 +117,34 @@
     const ctx = canvas.getContext('2d');
     const W = 800, H = 520;
 
-    const PHYSICS = { friction: 0.988, wallBounce: 0.6, pinBounce: 0.82, powerMult: 0.14 };
+    const PHYSICS = { friction: 0.988, wallBounce: 0.6, pinBounce: 0.82, powerMult: 0.16 };
     let score = [0, 0], currentPlayer = 1, timeLeft = 60, isMoving = false, isDragging = false;
     let gameActive = false, dragCurrent = {x:0,y:0}, timerInterval;
-    let lastTimestamp = 0;
 
     let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
     const pins = [];
     const PIN_RADIUS = 8;
 
+    function toggleFS() {
+        const elem = document.documentElement;
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => { console.log("Error al activar pantalla completa"); });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
     function getCoords(e) {
         const rect = canvas.getBoundingClientRect();
-        const canvasDisplayWidth = rect.width;
-        const canvasDisplayHeight = rect.height;
-        
-        let clientX, clientY;
-        
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-        
-        let x = (clientX - rect.left) * (W / canvasDisplayWidth);
-        let y = (clientY - rect.top) * (H / canvasDisplayHeight);
-        
-        return { 
-            x: Math.min(Math.max(0, x), W), 
-            y: Math.min(Math.max(0, y), H) 
+        let cx = e.touches ? e.touches[0].clientX : e.clientX;
+        let cy = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: (cx - rect.left) * (W / rect.width),
+            y: (cy - rect.top) * (H / rect.height)
         };
     }
 
     function initField() {
-        pins.length = 0;
         const createFormation = (dir) => {
             const baseX = dir === 1 ? W * 0.1 : W * 0.9;
             const s = dir === 1 ? 75 : -75;
@@ -276,281 +154,102 @@
             pins.push({ x: baseX + s*3.8, y: H/2 });
             [0.38, 0.62].forEach(p => pins.push({ x: baseX + s*5.2, y: H*p }));
         };
-        createFormation(1); 
-        createFormation(-1);
+        createFormation(1); createFormation(-1);
     }
 
     function drawMarble(b) {
-        ctx.save();
-        ctx.translate(b.x, b.y);
-        
-        // Sombra
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.beginPath();
-        ctx.arc(b.vx * 0.5, b.vy * 0.5 + 5, b.radius, 0, Math.PI*2);
-        ctx.fill();
-
-        // Base
-        ctx.beginPath();
-        ctx.arc(0, 0, b.radius, 0, Math.PI*2);
-        let g = ctx.createRadialGradient(-4, -4, 0, 0, 0, b.radius);
-        g.addColorStop(0, '#ffffff');
-        g.addColorStop(0.5, '#e0f2f1');
-        g.addColorStop(1, '#80cbc4');
-        ctx.fillStyle = g;
-        ctx.fill();
-
-        // Bandas tricolor
+        ctx.save(); ctx.translate(b.x, b.y);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath();
+        ctx.arc(b.vx, b.vy + 5, b.radius, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2);
+        let g = ctx.createRadialGradient(-3, -3, 0, 0, 0, b.radius);
+        g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#b2dfdb');
+        ctx.fillStyle = g; ctx.fill();
         ctx.rotate(b.angle);
         const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
         tricolor.forEach((col, i) => {
-            ctx.save();
-            ctx.rotate((Math.PI * 2 / 3) * i);
-            ctx.fillStyle = col;
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.quadraticCurveTo(b.radius * 0.6, -b.radius * 0.4, b.radius * 0.9, 0);
-            ctx.quadraticCurveTo(b.radius * 0.6, b.radius * 0.4, 0, 0);
-            ctx.fill();
-            ctx.restore();
+            ctx.save(); ctx.rotate((Math.PI * 2 / 3) * i);
+            ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(b.radius * 0.8, -b.radius * 0.5, b.radius * 0.8, b.radius * 0.5, 0, 0);
+            ctx.fill(); ctx.restore();
         });
-
-        ctx.restore();
-        
-        // Brillo
-        ctx.save();
-        ctx.translate(b.x, b.y);
-        let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 2, 0, 0, b.radius);
-        shine.addColorStop(0, 'rgba(255,255,255,0.7)');
-        shine.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = shine;
-        ctx.beginPath();
-        ctx.arc(0, 0, b.radius - 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.restore(); ctx.save(); ctx.translate(b.x, b.y);
+        let shine = ctx.createRadialGradient(-b.radius/2.5, -b.radius/2.5, 1, 0, 0, b.radius);
+        shine.addColorStop(0, 'rgba(255,255,255,0.8)'); shine.addColorStop(1, 'rgba(0,0,0,0.05)');
+        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
 
     function update() {
         if (!gameActive) return;
-        
         if (isMoving) {
             const speed = Math.hypot(ball.vx, ball.vy);
-            ball.angle += speed * 0.1;
-            ball.x += ball.vx;
-            ball.y += ball.vy;
-            ball.vx *= PHYSICS.friction;
-            ball.vy *= PHYSICS.friction;
-
-            // Bordes superior e inferior
-            if (ball.y < ball.radius) {
-                ball.vy = Math.abs(ball.vy) * PHYSICS.wallBounce;
-                ball.y = ball.radius;
+            ball.angle += speed * 0.08;
+            ball.x += ball.vx; ball.y += ball.vy;
+            ball.vx *= PHYSICS.friction; ball.vy *= PHYSICS.friction;
+            if (ball.y < ball.radius || ball.y > H - ball.radius) {
+                ball.vy *= -PHYSICS.wallBounce; ball.y = ball.y < ball.radius ? ball.radius : H-ball.radius;
             }
-            if (ball.y > H - ball.radius) {
-                ball.vy = -Math.abs(ball.vy) * PHYSICS.wallBounce;
-                ball.y = H - ball.radius;
+            if (ball.x < 25 || ball.x > W - 25) {
+                if (ball.y > H/2 - 60 && ball.y < H/2 + 60) {
+                    if (ball.x < W/2) { score[1]++; currentPlayer = 1; } 
+                    else { score[0]++; currentPlayer = 2; }
+                    resetBallPosition(); return;
+                } else {
+                    ball.vx *= -PHYSICS.wallBounce; ball.x = ball.x < 25 ? 25 : W-25;
+                }
             }
-            
-            // Goles
-            const goalZone = 70;
-            const isGoalLeft = (ball.x < 30 && Math.abs(ball.y - H/2) < goalZone);
-            const isGoalRight = (ball.x > W - 30 && Math.abs(ball.y - H/2) < goalZone);
-            
-            if (isGoalLeft) {
-                score[1]++;
-                currentPlayer = 1;
-                updateUI();
-                resetBallPosition();
-                return;
-            }
-            if (isGoalRight) {
-                score[0]++;
-                currentPlayer = 2;
-                updateUI();
-                resetBallPosition();
-                return;
-            }
-            
-            // Paredes laterales
-            if (ball.x < ball.radius) {
-                ball.vx = Math.abs(ball.vx) * PHYSICS.wallBounce;
-                ball.x = ball.radius;
-            }
-            if (ball.x > W - ball.radius) {
-                ball.vx = -Math.abs(ball.vx) * PHYSICS.wallBounce;
-                ball.x = W - ball.radius;
-            }
-
-            // Colisión con pinos
             pins.forEach(p => {
-                const dx = ball.x - p.x;
-                const dy = ball.y - p.y;
-                const d = Math.hypot(dx, dy);
+                const dx = ball.x - p.x, dy = ball.y - p.y, d = Math.hypot(dx, dy);
                 if (d < ball.radius + PIN_RADIUS) {
-                    const ang = Math.atan2(dy, dx);
-                    const currentSpeed = Math.hypot(ball.vx, ball.vy);
-                    ball.vx = Math.cos(ang) * currentSpeed * PHYSICS.pinBounce;
-                    ball.vy = Math.sin(ang) * currentSpeed * PHYSICS.pinBounce;
-                    const overlap = (ball.radius + PIN_RADIUS) - d;
-                    ball.x += Math.cos(ang) * overlap;
-                    ball.y += Math.sin(ang) * overlap;
+                    const ang = Math.atan2(dy, dx), s = Math.hypot(ball.vx, ball.vy);
+                    ball.vx = Math.cos(ang) * s * PHYSICS.pinBounce;
+                    ball.vy = Math.sin(ang) * s * PHYSICS.pinBounce;
+                    ball.x = p.x + Math.cos(ang) * (ball.radius + PIN_RADIUS + 1);
                 }
             });
-
-            // Detener movimiento
-            if (Math.hypot(ball.vx, ball.vy) < 0.5) { 
-                ball.vx = 0;
-                ball.vy = 0;
-                isMoving = false; 
-                currentPlayer = (currentPlayer === 1) ? 2 : 1; 
-                updateUI(); 
-            }
+            if (speed < 0.2) { isMoving = false; currentPlayer = (currentPlayer === 1) ? 2 : 1; updateUI(); }
         }
     }
 
     function draw() {
-        // Fondo
-        ctx.fillStyle = '#5d4037';
-        ctx.fillRect(0, 0, W, H);
-        
-        // Césped (textura sutil)
-        ctx.fillStyle = '#6d4c41';
-        for(let i = 0; i < 200; i++) {
-            ctx.fillRect(Math.random() * W, Math.random() * H, 2, 1);
-        }
-        
-        // Líneas de la cancha
-        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-        ctx.lineWidth = 2;
+        ctx.fillStyle = '#5d4037'; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 2;
         ctx.strokeRect(15, 15, W-30, H-30);
-        
-        ctx.beginPath();
-        ctx.moveTo(W/2, 10);
-        ctx.lineTo(W/2, H-10);
-        ctx.stroke();
-        
-        ctx.beginPath();
-        ctx.arc(W/2, H/2, 60, 0, Math.PI*2);
-        ctx.stroke();
-        
-        ctx.beginPath();
-        ctx.arc(W/2, H/2, 30, 0, Math.PI*2);
-        ctx.stroke();
-
-        // Textos
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 22px "Segoe UI", Arial';
-        ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 35);
-        ctx.font = 'bold 18px "Segoe UI", Arial';
-        ctx.fillStyle = currentPlayer === 1 && !isMoving ? 'var(--p1)' : '#aaa';
-        ctx.fillText('JUGADOR 1', W*0.25, 45);
-        ctx.fillStyle = currentPlayer === 2 && !isMoving ? 'var(--p2)' : '#aaa';
-        ctx.fillText('JUGADOR 2', W*0.75, 45);
-
-        // Porterías
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 4;
-        ctx.setLineDash([]);
-        ctx.strokeRect(-5, H/2-60, 30, 120);
-        ctx.strokeRect(W-25, H/2-60, 30, 120);
-        
-        // Red
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-        ctx.lineWidth = 1;
-        for(let i = -50; i <= 50; i+=15) {
-            ctx.beginPath();
-            ctx.moveTo(0, H/2 + i);
-            ctx.lineTo(25, H/2 + i);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(W-25, H/2 + i);
-            ctx.lineTo(W, H/2 + i);
-            ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.textAlign = 'center';
+        ctx.font = 'bold 26px Arial'; ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 45); 
+        ctx.font = 'bold 20px Arial'; ctx.fillText('JUGADOR 1', W*0.25, 60); ctx.fillText('JUGADOR 2', W*0.75, 60);
+        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
+        ctx.strokeRect(-10, H/2-60, 35, 120); ctx.strokeRect(W-25, H/2-60, 35, 120);
+        pins.forEach(p => { ctx.fillStyle = '#212121'; ctx.beginPath(); ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2); ctx.fill(); });
+        if (isDragging) {
+            ctx.beginPath(); ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)'; 
+            ctx.setLineDash([5,5]); ctx.lineWidth = 3;
+            ctx.moveTo(ball.x, ball.y); ctx.lineTo(ball.x + (ball.x - dragCurrent.x), ball.y + (ball.y - dragCurrent.y));
+            ctx.stroke(); ctx.setLineDash([]);
         }
-
-        // Pinos
-        pins.forEach(p => {
-            ctx.fillStyle = '#1a1a1a';
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#444';
-            ctx.beginPath();
-            ctx.arc(p.x-1, p.y-1, 2, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#888';
-            ctx.beginPath();
-            ctx.arc(p.x-2, p.y-2, 1, 0, Math.PI*2);
-            ctx.fill();
-        });
-
-        // Indicador de tiro
-        if (isDragging && !isMoving && gameActive) {
-            const dx = ball.x - dragCurrent.x;
-            const dy = ball.y - dragCurrent.y;
-            const force = Math.min(Math.hypot(dx, dy), 100);
-            
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 215, 0, ${0.3 + force/150})`;
-            ctx.setLineDash([5, 8]);
-            ctx.lineWidth = 3;
-            ctx.moveTo(ball.x, ball.y);
-            ctx.lineTo(ball.x + dx * 1.5, ball.y + dy * 1.5);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // Círculo de fuerza
-            ctx.fillStyle = `rgba(255, 215, 0, ${0.2 + force/200})`;
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, 15 + force/4, 0, Math.PI*2);
-            ctx.fill();
-            
-            // Texto de fuerza
-            ctx.fillStyle = '#ffd700';
-            ctx.font = 'bold 12px Arial';
-            ctx.shadowBlur = 0;
-            ctx.fillText(`${Math.round(force)}%`, ball.x + 20, ball.y - 10);
-        }
-
-        drawMarble(ball);
-        update();
-        requestAnimationFrame(draw);
+        drawMarble(ball); update(); requestAnimationFrame(draw);
     }
 
     function startGame() {
         document.getElementById('splash-screen').style.display = 'none';
-        gameActive = true;
-        score = [0, 0];
-        currentPlayer = 1;
-        timeLeft = 60;
-        isMoving = false;
-        isDragging = false;
-        updateUI();
-        resetBallPosition();
-        startTimer();
+        gameActive = true; startTimer();
     }
 
     function startTimer() {
         if(timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             if (!gameActive) return;
-            if (timeLeft > 0) {
-                timeLeft--;
-                document.getElementById('timer').innerText = timeLeft;
-                if (timeLeft <= 0) endGame();
-            }
+            timeLeft--; document.getElementById('timer').innerText = timeLeft;
+            if (timeLeft <= 0) endGame();
         }, 1000);
     }
 
     function resetBallPosition() {
-        isMoving = false;
-        isDragging = false;
-        ball.vx = 0;
-        ball.vy = 0;
-        ball.angle = 0;
-        ball.x = currentPlayer === 1 ? 65 : W - 65;
-        ball.y = H/2;
+        isMoving = false; ball.vx = 0; ball.vy = 0;
+        ball.x = currentPlayer === 1 ? 65 : W - 65; ball.y = H/2;
         updateUI();
     }
 
@@ -560,113 +259,40 @@
         const t = document.getElementById('turnText');
         t.innerText = `Turno: J${currentPlayer}`;
         t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
-        
-        // Actualizar timer display
-        document.getElementById('timer').innerText = timeLeft;
     }
 
     function endGame() {
-        gameActive = false;
-        clearInterval(timerInterval);
+        gameActive = false; clearInterval(timerInterval);
         const vig = document.getElementById('winnerVignette');
-        let winText = score[0] > score[1] ? "🏆 VICTORIA JUGADOR 1 🏆" : 
-                      (score[1] > score[0] ? "🏆 VICTORIA JUGADOR 2 🏆" : "🤝 EMPATE 🤝");
-        document.getElementById('winnerText').innerHTML = winText;
+        let win = score[0] > score[1] ? "¡VICTORIA J1!" : (score[1] > score[0] ? "¡VICTORIA J2!" : "¡EMPATE!");
+        document.getElementById('winnerText').innerText = win;
         vig.style.display = 'flex';
     }
 
-    function resetGame() {
-        if(timerInterval) clearInterval(timerInterval);
-        score = [0, 0];
-        currentPlayer = 1;
-        timeLeft = 60;
-        gameActive = true;
-        isMoving = false;
-        isDragging = false;
-        resetBallPosition();
-        updateUI();
-        startTimer();
-        document.getElementById('winnerVignette').style.display = 'none';
-    }
-
-    // Manejadores de eventos táctiles MEJORADOS
+    // SOLUCIÓN LISTENERS: Eventos movidos estrictamente al canvas y manejo de fin de arrastre corregido
     function handleDown(e) { 
-        e.preventDefault();
         if(isMoving || !gameActive) return; 
-        const coords = getCoords(e);
-        if(Math.hypot(coords.x - ball.x, coords.y - ball.y) < 55) {
-            isDragging = true;
-            dragCurrent = coords;
-        }
+        let c = getCoords(e);
+        if(Math.hypot(c.x - ball.x, c.y - ball.y) < 60) { isDragging = true; dragCurrent = c; } 
     }
+    function handleMove(e) { if(isDragging) { dragCurrent = getCoords(e); e.preventDefault(); } }
+    function handleUp() { 
+        if(!isDragging) return; 
+        ball.vx = (ball.x - dragCurrent.x) * PHYSICS.powerMult; 
+        ball.vy = (ball.y - dragCurrent.y) * PHYSICS.powerMult; 
+        isDragging = false; isMoving = true; 
+    }
+
+    canvas.addEventListener('mousedown', handleDown);
+    canvas.addEventListener('touchstart', handleDown, {passive:false});
     
-    function handleMove(e) { 
-        if(!isDragging || !gameActive) return;
-        e.preventDefault();
-        dragCurrent = getCoords(e);
-    }
-    
-    function handleUp(e) { 
-        e.preventDefault();
-        if(!isDragging || isMoving || !gameActive) {
-            isDragging = false;
-            return;
-        }
-        
-        const dx = ball.x - dragCurrent.x;
-        const dy = ball.y - dragCurrent.y;
-        const force = Math.min(Math.hypot(dx, dy), 100);
-        
-        if(force > 8) {
-            ball.vx = dx * PHYSICS.powerMult;
-            ball.vy = dy * PHYSICS.powerMult;
-            isMoving = true;
-        }
-        isDragging = false;
-    }
+    // Los eventos de movimiento se quedan en window para permitir que el dedo se salga del canvas sin perder el tiro
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    window.addEventListener('touchmove', handleMove, {passive:false});
+    window.addEventListener('touchend', handleUp);
 
-    function setupEvents() {
-        canvas.addEventListener('touchstart', handleDown, { passive: false });
-        canvas.addEventListener('touchmove', handleMove, { passive: false });
-        canvas.addEventListener('touchend', handleUp);
-        canvas.addEventListener('touchcancel', handleUp);
-        
-        canvas.addEventListener('mousedown', handleDown);
-        window.addEventListener('mousemove', (e) => {
-            if(isDragging) handleMove(e);
-        });
-        window.addEventListener('mouseup', handleUp);
-    }
-
-    function setupFullscreen() {
-        const btn = document.getElementById('fullscreenBtn');
-        btn.addEventListener('click', () => {
-            const elem = document.documentElement;
-            if(elem.requestFullscreen) elem.requestFullscreen();
-            else if(elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            else if(elem.msRequestFullscreen) elem.msRequestFullscreen();
-        });
-    }
-
-    // Inicialización
-    function init() {
-        initField();
-        setupEvents();
-        setupFullscreen();
-        draw();
-        
-        document.getElementById('startBtn').onclick = startGame;
-        document.getElementById('resetGameBtn').onclick = resetGame;
-        document.getElementById('closeRotateBtn').onclick = () => {
-            document.getElementById('rotate-overlay').style.display = 'none';
-            document.querySelector('.game-wrapper').style.filter = 'none';
-            document.querySelector('.game-wrapper').style.pointerEvents = 'auto';
-        };
-        
-        updateUI();
-    }
-
-    init();
+    initField(); updateUI(); draw();
 </script>
 </body>
 </html>
