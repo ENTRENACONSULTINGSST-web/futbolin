@@ -2,58 +2,86 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Futbolín de Clavos - Edición Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Meta tags para compartir por WhatsApp (Previsualización) -->
+    <meta property="og:title" content="Futbolín de Clavos: Edición Boloncho">
+    <meta property="og:description" content="¡Duelo de 60 segundos! Elige tu canica y domina la cancha táctica.">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/53/53254.png"> <!-- Icono Genérico -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/53/53254.png">
+
+    <title>Futbolín de Clavos - Boloncho</title>
     <style>
-        * { user-select: none; -webkit-tap-highlight-color: transparent; }
+        :root { --p1: #d32f2f; --p2: #1976d2; }
+        * { user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        
         body {
-            background: #1a1a1a;
+            background: #1a1a1a; margin: 0; overflow: hidden;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif; height: 100vh;
         }
+
+        /* Bloqueo Horizontal */
+        #rotate-screen {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #1a1a1a; color: white; z-index: 1000;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        @media (orientation: portrait) {
+            #rotate-screen { display: flex; }
+            .game-container { display: none; }
+        }
+
         .game-container {
-            background: #4e342e; padding: 15px; border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7); border: 8px solid #3e2723;
-            position: relative;
+            background: #4e342e; padding: 10px; border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8); border: 6px solid #3e2723;
+            width: 95vw; max-width: 850px; position: relative;
         }
+
         canvas {
             display: block; background: #bcaaa4; border-radius: 5px;
-            cursor: crosshair; box-shadow: inset 0 0 50px rgba(0,0,0,0.3);
+            cursor: crosshair; touch-action: none; width: 100%; height: auto;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.2);
         }
+
         .ui-top {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px; color: #fff; width: 100%;
+            margin-bottom: 8px; color: #fff; width: 100%;
         }
-        .stat-box {
-            background: #3e2723; padding: 8px 20px; border-radius: 50px;
-            font-weight: bold; border: 2px solid #5d4037; min-width: 80px; text-align: center;
-        }
-        .turn { transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .p1-active { background: #d32f2f; box-shadow: 0 0 15px #d32f2f; }
-        .p2-active { background: #1976d2; box-shadow: 0 0 15px #1976d2; }
-        
-        .texture-selector { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
-        .t-btn { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: 0.2s; }
-        .t-btn.active { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
 
+        .stat-box {
+            background: #3e2723; padding: 6px 15px; border-radius: 20px;
+            font-weight: bold; border: 1px solid #5d4037; font-size: 14px;
+        }
+
+        .turn { transition: 0.3s; }
+        .p1-active { background: var(--p1); box-shadow: 0 0 10px var(--p1); }
+        .p2-active { background: var(--p2); box-shadow: 0 0 10px var(--p2); }
+
+        .texture-selector { display: flex; gap: 8px; margin-top: 8px; justify-content: center; }
+        .t-btn { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .t-btn.active { border-color: #fff; transform: scale(1.1); }
+
+        /* Viñeta Ganador */
         #winnerVignette {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92); border-radius: 12px; z-index: 100;
+            background: rgba(0,0,0,0.9); z-index: 100; border-radius: 10px;
             flex-direction: column; justify-content: center; align-items: center; color: white;
         }
-        #winnerText { font-size: 36px; color: #ffeb3b; text-shadow: 0 0 20px #fbc02d; margin-bottom: 20px; }
-        .restart-btn { 
-            padding: 12px 30px; font-size: 18px; font-weight: bold; cursor: pointer; 
-            background: #2e7d32; color: white; border: none; border-radius: 50px;
-        }
+        #winnerText { font-size: 30px; color: #ffeb3b; text-shadow: 0 0 15px #fbc02d; }
     </style>
 </head>
 <body>
 
+<div id="rotate-screen">
+    <div style="font-size: 50px;">🔄</div>
+    <p>GIRA TU DISPOSITIVO<br>A MODO HORIZONTAL</p>
+</div>
+
 <div class="game-container">
     <div class="ui-top">
         <div id="turnText" class="stat-box turn p1-active">Turno: J1</div>
-        <div class="stat-box" style="font-size: 20px;">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
+        <div class="stat-box">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
         <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
     </div>
 
@@ -62,43 +90,51 @@
     <div class="texture-selector" id="selectors"></div>
 
     <div id="winnerVignette">
-        <h1 id="winnerText">GANADOR</h1>
-        <button class="restart-btn" onclick="location.reload()">REINICIAR JUEGO</button>
+        <h1 id="winnerText">JUGADOR 1 GANADOR</h1>
+        <button onclick="location.reload()" style="padding: 10px 20px; cursor:pointer; border-radius: 20px; border:none; background: #2e7d32; color:white;">REINICIAR</button>
     </div>
 </div>
 
 <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
+    const W = 800, H = 520;
 
     const PHYSICS = { friction: 0.988, wallBounce: 0.6, pinBounce: 0.82, powerMult: 0.16 };
     let score = [0, 0], currentPlayer = 1, timeLeft = 60, isMoving = false, isDragging = false;
-    let gameActive = true, dragStart = { x: 0, y: 0 }, dragCurrent = { x: 0, y: 0 }, timerInterval;
+    let gameActive = true, dragStart = {x:0,y:0}, dragCurrent = {x:0,y:0};
 
+    // Audio Context
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playGoalSound() {
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.type = 'square'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.connect(audioCtx.destination);
+        osc.connect(gain); osc.start(); osc.stop(audioCtx.currentTime + 0.2);
     }
 
-    let ball = { x: 60, y: H/2, vx: 0, vy: 0, radius: 11, angle: 0, color: '#4caf50' };
+    let ball = { x: 40, y: H/2, vx: 0, vy: 0, radius: 11, angle: 0, color: '#4caf50' };
     const pins = [], PIN_RADIUS = 8;
 
     function initField() {
         const createFormation = (dir) => {
             const baseX = dir === 1 ? W * 0.1 : W * 0.9;
             const s = dir === 1 ? 75 : -75;
-            pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); // Portero
+            pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); // Porteros
             [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s, y: H*p }));
             [0.3, 0.5, 0.7].forEach(p => pins.push({ x: baseX + s*2.5, y: H*p }));
             pins.push({ x: baseX + s*3.8, y: H/2 });
             [0.38, 0.62].forEach(p => pins.push({ x: baseX + s*5.2, y: H*p }));
         };
         createFormation(1); createFormation(-1);
+    }
+
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: (clientX - rect.left) * (W / rect.width), y: (clientY - rect.top) * (H / rect.height) };
     }
 
     function drawMarble(b) {
@@ -113,7 +149,8 @@
         ctx.restore(); ctx.save(); ctx.translate(b.x, b.y);
         let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 1, 0, 0, b.radius);
         shine.addColorStop(0, 'rgba(255,255,255,0.7)'); shine.addColorStop(1, 'rgba(0,0,0,0.1)');
-        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2); ctx.fill(); ctx.restore();
+        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
     }
 
     function update() {
@@ -127,55 +164,47 @@
             if (ball.y < ball.radius || ball.y > H - ball.radius) {
                 ball.vy *= -PHYSICS.wallBounce; ball.y = ball.y < ball.radius ? ball.radius : H-ball.radius;
             }
-
             if (ball.x < 25 || ball.x > W - 25) {
                 if (ball.y > H/2 - 60 && ball.y < H/2 + 60) {
                     playGoalSound();
+                    if(navigator.vibrate) navigator.vibrate(200);
                     if (ball.x < W/2) score[1]++; else score[0]++;
                     resetBallPosition();
                 } else {
-                    ball.vx *= -PHYSICS.wallBounce; 
-                    ball.x = ball.x < 25 ? 25 : W - 25;
+                    ball.vx *= -PHYSICS.wallBounce; ball.x = ball.x < 25 ? 25 : W-25;
                 }
             }
-
             pins.forEach(p => {
-                const dx = ball.x - p.x, dy = ball.y - p.y, dist = Math.hypot(dx, dy);
-                if (dist < ball.radius + PIN_RADIUS) {
+                const dx = ball.x - p.x, dy = ball.y - p.y, d = Math.hypot(dx, dy);
+                if (d < ball.radius + PIN_RADIUS) {
                     const ang = Math.atan2(dy, dx), s = Math.hypot(ball.vx, ball.vy);
                     ball.vx = Math.cos(ang) * s * PHYSICS.pinBounce;
                     ball.vy = Math.sin(ang) * s * PHYSICS.pinBounce;
                     ball.x = p.x + Math.cos(ang) * (ball.radius + PIN_RADIUS + 1);
                     ball.y = p.y + Math.sin(ang) * (ball.radius + PIN_RADIUS + 1);
+                    if(navigator.vibrate) navigator.vibrate(40);
                 }
             });
-
-            if (speed < 0.2) { ball.vx = 0; ball.vy = 0; isMoving = false; currentPlayer = currentPlayer === 1 ? 2 : 1; updateUI(); }
+            if (speed < 0.2) { isMoving = false; currentPlayer = (currentPlayer === 1) ? 2 : 1; updateUI(); }
         }
     }
 
     function draw() {
         ctx.fillStyle = '#5d4037'; ctx.fillRect(0, 0, W, H);
         ctx.strokeStyle = 'rgba(0,0,0,0.05)';
-       for(let i=0; i<H; i+=25) { ctx.beginPath(); ctx.moveTo(0,i); ctx.quadraticCurveTo(W/2,i+10,W,i); ctx.stroke(); }
-// 3. Líneas de la Cancha
-ctx.strokeStyle = 'rgba(255,255,255,0.2)'; 
-ctx.lineWidth = 2;
-ctx.strokeRect(10, 10, W-20, H-20); 
-ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke(); 
-ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke(); 
+        for(let i=0; i<H; i+=25) { ctx.beginPath(); ctx.moveTo(0,i); ctx.quadraticCurveTo(W/2,i+10,W,i); ctx.stroke(); }
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 2;
+        ctx.strokeRect(10, 10, W-20, H-20);
+        ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
 
-// --- INSERTAR AQUÍ: Etiquetas de Jugador ---
-ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-ctx.font = 'bold 24px Segoe UI';
-ctx.textAlign = 'center';
-ctx.fillText('JUGADOR 1', W * 0.25, 50);
-ctx.fillText('JUGADOR 2', W * 0.75, 50);
+        // Nombres Jugadores
+        ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.font = 'bold 24px Arial'; ctx.textAlign = 'center';
+        ctx.fillText('JUGADOR 1', W*0.25, 50); ctx.fillText('JUGADOR 2', W*0.75, 50);
+
         // Arcos
         ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
-        const gTop = H/2 - 60, gBot = H/2 + 60;
-        ctx.strokeRect(-5, gTop, 30, 120);
-        ctx.strokeRect(W - 25, gTop, 30, 120);
+        ctx.strokeRect(-5, H/2-60, 30, 120); ctx.strokeRect(W-25, H/2-60, 30, 120);
 
         pins.forEach(p => {
             ctx.fillStyle = '#212121'; ctx.beginPath(); ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2); ctx.fill();
@@ -188,31 +217,24 @@ ctx.fillText('JUGADOR 2', W * 0.75, 50);
             ctx.stroke(); ctx.setLineDash([]);
         }
 
-        drawMarble(ball);
-        update();
-        requestAnimationFrame(draw);
+        drawMarble(ball); update(); requestAnimationFrame(draw);
     }
 
-    function startTimer() {
-        timerInterval = setInterval(() => {
-            if (!gameActive) return;
-            timeLeft--; document.getElementById('timer').innerText = timeLeft;
-            if (timeLeft <= 0) endGame();
-        }, 1000);
-    }
-
-    function endGame() {
-        gameActive = false; clearInterval(timerInterval);
-        const vig = document.getElementById('winnerVignette');
-        const txt = document.getElementById('winnerText');
-        let win = score[0] > score[1] ? "JUGADOR 1" : (score[1] > score[0] ? "JUGADOR 2" : "EMPATE");
-        txt.innerText = win === "EMPATE" ? "¡EMPATE!" : `${win} GANADOR`;
-        vig.style.display = 'flex';
-    }
+    let timer = setInterval(() => {
+        if (!gameActive) return;
+        timeLeft--; document.getElementById('timer').innerText = timeLeft;
+        if (timeLeft <= 0) { 
+            gameActive = false; clearInterval(timer);
+            const vig = document.getElementById('winnerVignette');
+            let win = score[0] > score[1] ? "JUGADOR 1" : (score[1] > score[0] ? "JUGADOR 2" : "EMPATE");
+            document.getElementById('winnerText').innerText = win === "EMPATE" ? "¡EMPATE!" : win + " GANADOR";
+            vig.style.display = 'flex';
+        }
+    }, 1000);
 
     function resetBallPosition() {
         isMoving = false; ball.vx = 0; ball.vy = 0;
-        ball.x = currentPlayer === 1 ? 60 : W-60; ball.y = H/2; updateUI();
+        ball.x = currentPlayer === 1 ? 45 : W-45; ball.y = H/2; updateUI();
     }
 
     function updateUI() {
@@ -221,34 +243,23 @@ ctx.fillText('JUGADOR 2', W * 0.75, 50);
         t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
     }
 
-    canvas.addEventListener('mousedown', e => {
-        if (isMoving || !gameActive) return;
-        const rect = canvas.getBoundingClientRect();
-        dragStart.x = e.clientX - rect.left; dragStart.y = e.clientY - rect.top;
-        if (Math.hypot(dragStart.x - ball.x, dragStart.y - ball.y) < 40) isDragging = true;
-    });
-    window.addEventListener('mousemove', e => {
-        if (!isDragging) return;
-        const rect = canvas.getBoundingClientRect();
-        dragCurrent.x = e.clientX - rect.left; dragCurrent.y = e.clientY - rect.top;
-    });
-    window.addEventListener('mouseup', () => {
-        if (!isDragging) return;
-        ball.vx = (ball.x - dragCurrent.x) * PHYSICS.powerMult; ball.vy = (ball.y - dragCurrent.y) * PHYSICS.powerMult;
-        isDragging = false; isMoving = true; if (audioCtx.state === 'suspended') audioCtx.resume();
-    });
+    canvas.addEventListener('mousedown', e => { if (isMoving || !gameActive) return; dragStart = getCoords(e); if (Math.hypot(dragStart.x - ball.x, dragStart.y - ball.y) < 40) isDragging = true; });
+    window.addEventListener('mousemove', e => { if (isDragging) dragCurrent = getCoords(e); });
+    window.addEventListener('mouseup', () => { if (!isDragging) return; ball.vx = (ball.x - dragCurrent.x) * PHYSICS.powerMult; ball.vy = (ball.y - dragCurrent.y) * PHYSICS.powerMult; isDragging = false; isMoving = true; if(audioCtx.state === 'suspended') audioCtx.resume(); });
+
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); if (isMoving || !gameActive) return; dragStart = getCoords(e); if (Math.hypot(dragStart.x - ball.x, dragStart.y - ball.y) < 40) isDragging = true; }, {passive:false});
+    window.addEventListener('touchmove', e => { if (isDragging) dragCurrent = getCoords(e); }, {passive:false});
+    window.addEventListener('touchend', () => { if (!isDragging) return; ball.vx = (ball.x - dragCurrent.x) * PHYSICS.powerMult; ball.vy = (ball.y - dragCurrent.y) * PHYSICS.powerMult; isDragging = false; isMoving = true; if(audioCtx.state === 'suspended') audioCtx.resume(); });
 
     const colors = [{c:'#4caf50'},{c:'#2196f3'},{c:'#ff9800'},{c:'#9c27b0'}];
     const sel = document.getElementById('selectors');
     colors.forEach((col, i) => {
-        const b = document.createElement('div'); b.className = 't-btn' + (i===0?' active':'');
-        b.style.background = col.c; b.onclick = function() {
-            ball.color = col.c; document.querySelectorAll('.t-btn').forEach(x => x.classList.remove('active')); this.classList.add('active');
-        };
+        const b = document.createElement('div'); b.className = 't-btn' + (i===0?' active':''); b.style.background = col.c;
+        b.onclick = function() { ball.color = col.c; document.querySelectorAll('.t-btn').forEach(x => x.classList.remove('active')); this.classList.add('active'); };
         sel.appendChild(b);
     });
 
-    initField(); startTimer(); draw();
+    initField(); updateUI(); draw();
 </script>
 </body>
 </html>
