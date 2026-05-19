@@ -2,297 +2,813 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Futbolín Tricolor - Entrena Consulting SAS</title>
-
-    <!-- SOLUCIÓN ERROR 404: Se eliminó la línea de og:image que causaba el error si el archivo no existía -->
-    <meta property="og:title" content="Futbolín Tricolor - Entrena Consulting SAS">
-    <meta property="og:description" content="¡Duelo de canicas! Expertos en SST.">
-    <meta property="og:url" content="https://entrenaconsultingsst-web.github.io/futbolin/">
 
     <style>
         :root { --p1: #d32f2f; --p2: #1976d2; --gold: #fbc02d; }
-        * { user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        * { user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
-            background: #121212; margin: 0; overflow: hidden;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            font-family: 'Segoe UI', Arial, sans-serif; height: 100vh;
+            background: #0a0a0a;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            touch-action: pan-x pan-y;
         }
 
-        /* SOLUCIÓN ROTACIÓN: Overlay removible con un clic si el usuario lo desea */
-        #rotate-screen {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(26, 26, 26, 0.95); color: white; z-index: 3000;
-            flex-direction: column; justify-content: center; align-items: center; cursor: pointer;
-        }
-        @media (orientation: portrait) { #rotate-screen { display: flex; } }
-
+        /* Pantalla de carga/splash */
         #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #2e7d32, #1a1a1a);
-            color: white; z-index: 2000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #1b5e20, #0a0a0a);
+            color: white;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            backdrop-filter: blur(0px);
+        }
+
+        #splash-screen h1 {
+            color: var(--gold);
+            margin: 20px 0;
+            font-size: clamp(24px, 6vw, 42px);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #splash-screen p {
+            font-size: clamp(14px, 4vw, 18px);
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        /* Overlay de rotación (sugerencia no bloqueante) */
+        #rotate-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 3000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        #rotate-overlay button {
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: var(--gold);
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Mostrar sugerencia solo en portrait */
+        @media (orientation: portrait) {
+            #rotate-overlay { display: flex; }
+            .game-wrapper { filter: blur(4px); pointer-events: none; }
+        }
+        
+        @media (orientation: landscape) {
+            #rotate-overlay { display: none !important; }
+            .game-wrapper { filter: none !important; pointer-events: auto !important; }
+        }
+
+        /* Contenedor principal del juego */
+        .game-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0a0a0a;
         }
 
         .game-container {
-            position: relative; display: flex; flex-direction: column;
-            width: 95vw; max-width: 820px; max-height: 98vh;
-            background: #3e2723; padding: 8px; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 4px solid #2d1b18;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 98%;
+            height: 98%;
+            max-width: 1400px;
+            background: #3e2723;
+            padding: 12px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 3px solid #5d4037;
         }
 
+        /* Panel superior */
         .ui-top {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 6px; color: #fff; width: 100%; flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #fff;
+            width: 100%;
+            flex-shrink: 0;
+            gap: 15px;
+            padding: 0 10px;
         }
 
         .stat-box {
-            background: #2d1b18; padding: 4px 12px; border-radius: 15px;
-            font-weight: bold; border: 1px solid #5d4037; font-size: clamp(10px, 2.5vh, 14px);
+            background: #2d1b18;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            border: 1px solid #5d4037;
+            font-size: clamp(14px, 3vh, 20px);
+            text-align: center;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
-        .turn { transition: 0.3s; }
-        .p1-active { background: var(--p1); box-shadow: 0 0 10px var(--p1); }
-        .p2-active { background: var(--p2); box-shadow: 0 0 10px var(--p2); }
-
-        canvas {
-            display: block; background: #bcaaa4; border-radius: 5px;
-            cursor: crosshair; touch-action: none; 
-            width: 100%; height: auto; max-height: 72vh;
-            object-fit: contain; aspect-ratio: 800 / 520;
-        }
-
-        #winnerVignette {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 100; border-radius: 10px;
-            flex-direction: column; justify-content: center; align-items: center; color: white;
+        .turn {
+            transition: 0.3s;
+            min-width: 130px;
         }
         
-        .btn {
-            padding: 10px 20px; font-size: 16px; font-weight: bold; cursor: pointer;
-            border-radius: 30px; border: none; background: var(--gold); color: #000; margin-top: 10px;
+        .p1-active { background: var(--p1); box-shadow: 0 0 15px var(--p1); }
+        .p2-active { background: var(--p2); box-shadow: 0 0 15px var(--p2); }
+
+        /* Wrapper del canvas */
+        .canvas-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #2a1a15;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
         }
 
-        /* Botón de pantalla completa sutil */
-        #fs-btn { position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 5px; padding: 5px; font-size: 10px; cursor: pointer; }
+        canvas {
+            display: block;
+            background: #bcaaa4;
+            border-radius: 10px;
+            touch-action: none;
+            cursor: crosshair;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Barra de controles */
+        .control-bar {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 8px 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 40px;
+            border: none;
+            background: var(--gold);
+            color: #000;
+            transition: transform 0.1s, background 0.2s;
+            font-family: inherit;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .btn:active { transform: scale(0.95); background: #f9a825; }
+
+        /* Pantalla de ganador */
+        #winnerVignette {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.97);
+            z-index: 100;
+            border-radius: 20px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+        
+        #winnerVignette h2 {
+            font-size: clamp(28px, 8vh, 56px);
+            margin-bottom: 20px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stat-box { padding: 6px 12px; font-size: 12px; }
+            .turn { min-width: 100px; }
+            .btn { padding: 6px 15px; font-size: 12px; }
+            .control-bar { gap: 10px; }
+            .game-container { padding: 8px; }
+        }
+        
+        @media (max-height: 450px) {
+            .stat-box { padding: 4px 10px; font-size: 11px; }
+            .turn { min-width: 85px; }
+            .control-bar { margin-top: 5px; }
+            .btn { padding: 4px 12px; font-size: 11px; }
+            .ui-top { margin-bottom: 5px; }
+        }
     </style>
 </head>
 <body>
 
-<div id="rotate-screen" onclick="this.style.display='none'">
-    <div style="font-size: 50px;">🔄</div>
-    <p>GIRA TU DISPOSITIVO</p>
-    <small>(Toca para ignorar)</small>
+<!-- Sugerencia de rotación (NO BLOQUEANTE) -->
+<div id="rotate-overlay">
+    <div style="font-size: 70px;">🔄</div>
+    <p style="margin: 20px; font-size: 18px;">GIRA tu dispositivo a horizontal para mejor experiencia</p>
+    <button id="closeRotateBtn">CONTINUAR ASÍ</button>
 </div>
 
+<!-- Pantalla de inicio -->
 <div id="splash-screen">
-    <div style="font-size: 12px; letter-spacing: 2px;">BIENVENIDOS A</div>
-    <h1 style="color:var(--gold); margin:10px 0;">ENTRENA CONSULTING SAS</h1>
-    <p>Expertos en SST</p>
-    <button class="btn" onclick="startGame()">INICIAR DUELO</button>
+    <div style="font-size: 14px; letter-spacing: 3px;">BIENVENIDOS A</div>
+    <h1>ENTRENA CONSULTING SAS</h1>
+    <p>Expertos en Seguridad y Salud en el Trabajo</p>
+    <button class="btn" id="startBtn" style="font-size: 18px; padding: 12px 35px;">▶ INICIAR DUELO</button>
 </div>
 
-<div class="game-container" id="main-container">
-    <div class="ui-top">
-        <div id="turnText" class="stat-box turn p1-active">Turno: J1</div>
-        <div class="stat-box" style="color:var(--gold)">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
-        <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
-    </div>
+<!-- Contenedor del juego -->
+<div class="game-wrapper">
+    <div class="game-container">
+        <div class="ui-top">
+            <div id="turnText" class="stat-box turn p1-active">🎯 Turno: J1</div>
+            <div class="stat-box" style="color:var(--gold); background:#1a0f0c;">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
+            <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
+        </div>
 
-    <canvas id="gameCanvas" width="800" height="520"></canvas>
-    
-    <!-- SOLUCIÓN PANTALLA COMPLETA: Botón adicional y función JS -->
-    <button id="fs-btn" onclick="toggleFS()">PANTALLA COMPLETA</button>
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="800" height="520"></canvas>
+        </div>
 
-    <div id="winnerVignette">
-        <h2 id="winnerText" style="color:var(--gold)"></h2>
-        <p>Entrena Consulting SAS</p>
-        <button class="btn" onclick="location.reload()">REINICIAR</button>
+        <div class="control-bar">
+            <button class="btn" id="fullscreenBtn">⛶ Pantalla completa</button>
+            <button class="btn" id="resetGameBtn">🔄 Reiniciar partida</button>
+        </div>
+
+        <div id="winnerVignette">
+            <h2 id="winnerText"></h2>
+            <p style="margin-bottom: 25px; font-size: 18px;">Entrena Consulting SAS - SST</p>
+            <button class="btn" onclick="location.reload()">🎮 JUGAR DE NUEVO</button>
+        </div>
     </div>
 </div>
 
 <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const W = 800, H = 520;
+    (function() {
+        // Canvas y contexto
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = 800, H = 520;
 
-    const PHYSICS = { friction: 0.988, wallBounce: 0.6, pinBounce: 0.82, powerMult: 0.16 };
-    let score = [0, 0], currentPlayer = 1, timeLeft = 60, isMoving = false, isDragging = false;
-    let gameActive = false, dragCurrent = {x:0,y:0}, timerInterval;
+        // Configuración física
+        const PHYSICS = { 
+            friction: 0.988, 
+            wallBounce: 0.65, 
+            pinBounce: 0.82, 
+            powerMult: 0.14 
+        };
+        
+        // Variables del juego
+        let score = [0, 0];
+        let currentPlayer = 1;
+        let timeLeft = 60;
+        let isMoving = false;
+        let gameActive = false;
+        let timerInterval = null;
+        
+        // Variables de arrastre (separadas para touch y mouse)
+        let touchDrag = false;
+        let mouseDrag = false;
+        let dragCurrent = { x: 0, y: 0 };
 
-    let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
-    const pins = [];
-    const PIN_RADIUS = 8;
+        // Elementos del juego
+        let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
+        const pins = [];
+        const PIN_RADIUS = 8;
 
-    function toggleFS() {
-        const elem = document.documentElement;
-        if (!document.fullscreenElement) {
-            elem.requestFullscreen().catch(err => { console.log("Error al activar pantalla completa"); });
-        } else {
-            document.exitFullscreen();
+        // ============ FUNCIONES DE UTILIDAD ============
+        function getCoordsFromEvent(e, isTouch = true) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = W / rect.width;
+            const scaleY = H / rect.height;
+            
+            let clientX, clientY;
+            
+            if (isTouch && e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            let x = (clientX - rect.left) * scaleX;
+            let y = (clientY - rect.top) * scaleY;
+            
+            return { 
+                x: Math.min(Math.max(0, x), W), 
+                y: Math.min(Math.max(0, y), H) 
+            };
         }
-    }
 
-    function getCoords(e) {
-        const rect = canvas.getBoundingClientRect();
-        let cx = e.touches ? e.touches[0].clientX : e.clientX;
-        let cy = e.touches ? e.touches[0].clientY : e.clientY;
-        return {
-            x: (cx - rect.left) * (W / rect.width),
-            y: (cy - rect.top) * (H / rect.height)
-        };
-    }
+        // ============ INICIALIZAR PINOS ============
+        function initField() {
+            pins.length = 0;
+            const createFormation = (dir) => {
+                const baseX = dir === 1 ? W * 0.1 : W * 0.9;
+                const s = dir === 1 ? 75 : -75;
+                pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); 
+                [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s, y: H * p }));
+                [0.3, 0.5, 0.7].forEach(p => pins.push({ x: baseX + s * 2.5, y: H * p }));
+                pins.push({ x: baseX + s * 3.8, y: H/2 });
+                [0.38, 0.62].forEach(p => pins.push({ x: baseX + s * 5.2, y: H * p }));
+            };
+            createFormation(1); 
+            createFormation(-1);
+        }
 
-    function initField() {
-        const createFormation = (dir) => {
-            const baseX = dir === 1 ? W * 0.1 : W * 0.9;
-            const s = dir === 1 ? 75 : -75;
-            pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); 
-            [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s, y: H*p }));
-            [0.3, 0.5, 0.7].forEach(p => pins.push({ x: baseX + s*2.5, y: H*p }));
-            pins.push({ x: baseX + s*3.8, y: H/2 });
-            [0.38, 0.62].forEach(p => pins.push({ x: baseX + s*5.2, y: H*p }));
-        };
-        createFormation(1); createFormation(-1);
-    }
+        // ============ DIBUJAR CANICA ============
+        function drawMarble(b) {
+            ctx.save();
+            ctx.translate(b.x, b.y);
+            
+            // Sombra
+            ctx.fillStyle = 'rgba(0,0,0,0.25)';
+            ctx.beginPath();
+            ctx.arc(b.vx * 0.5, b.vy * 0.5 + 4, b.radius, 0, Math.PI * 2);
+            ctx.fill();
 
-    function drawMarble(b) {
-        ctx.save(); ctx.translate(b.x, b.y);
-        ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath();
-        ctx.arc(b.vx, b.vy + 5, b.radius, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2);
-        let g = ctx.createRadialGradient(-3, -3, 0, 0, 0, b.radius);
-        g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#b2dfdb');
-        ctx.fillStyle = g; ctx.fill();
-        ctx.rotate(b.angle);
-        const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
-        tricolor.forEach((col, i) => {
-            ctx.save(); ctx.rotate((Math.PI * 2 / 3) * i);
-            ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, 0);
-            ctx.bezierCurveTo(b.radius * 0.8, -b.radius * 0.5, b.radius * 0.8, b.radius * 0.5, 0, 0);
-            ctx.fill(); ctx.restore();
-        });
-        ctx.restore(); ctx.save(); ctx.translate(b.x, b.y);
-        let shine = ctx.createRadialGradient(-b.radius/2.5, -b.radius/2.5, 1, 0, 0, b.radius);
-        shine.addColorStop(0, 'rgba(255,255,255,0.8)'); shine.addColorStop(1, 'rgba(0,0,0,0.05)');
-        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-    }
+            // Base
+            ctx.beginPath();
+            ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+            let g = ctx.createRadialGradient(-4, -4, 0, 0, 0, b.radius);
+            g.addColorStop(0, '#ffffff');
+            g.addColorStop(0.5, '#e0f2f1');
+            g.addColorStop(1, '#80cbc4');
+            ctx.fillStyle = g;
+            ctx.fill();
 
-    function update() {
-        if (!gameActive) return;
-        if (isMoving) {
-            const speed = Math.hypot(ball.vx, ball.vy);
-            ball.angle += speed * 0.08;
-            ball.x += ball.vx; ball.y += ball.vy;
-            ball.vx *= PHYSICS.friction; ball.vy *= PHYSICS.friction;
-            if (ball.y < ball.radius || ball.y > H - ball.radius) {
-                ball.vy *= -PHYSICS.wallBounce; ball.y = ball.y < ball.radius ? ball.radius : H-ball.radius;
-            }
-            if (ball.x < 25 || ball.x > W - 25) {
-                if (ball.y > H/2 - 60 && ball.y < H/2 + 60) {
-                    if (ball.x < W/2) { score[1]++; currentPlayer = 1; } 
-                    else { score[0]++; currentPlayer = 2; }
-                    resetBallPosition(); return;
-                } else {
-                    ball.vx *= -PHYSICS.wallBounce; ball.x = ball.x < 25 ? 25 : W-25;
-                }
-            }
-            pins.forEach(p => {
-                const dx = ball.x - p.x, dy = ball.y - p.y, d = Math.hypot(dx, dy);
-                if (d < ball.radius + PIN_RADIUS) {
-                    const ang = Math.atan2(dy, dx), s = Math.hypot(ball.vx, ball.vy);
-                    ball.vx = Math.cos(ang) * s * PHYSICS.pinBounce;
-                    ball.vy = Math.sin(ang) * s * PHYSICS.pinBounce;
-                    ball.x = p.x + Math.cos(ang) * (ball.radius + PIN_RADIUS + 1);
-                }
+            // Bandas tricolor
+            ctx.rotate(b.angle);
+            const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
+            tricolor.forEach((col, i) => {
+                ctx.save();
+                ctx.rotate((Math.PI * 2 / 3) * i);
+                ctx.fillStyle = col;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.quadraticCurveTo(b.radius * 0.6, -b.radius * 0.4, b.radius * 0.9, 0);
+                ctx.quadraticCurveTo(b.radius * 0.6, b.radius * 0.4, 0, 0);
+                ctx.fill();
+                ctx.restore();
             });
-            if (speed < 0.2) { isMoving = false; currentPlayer = (currentPlayer === 1) ? 2 : 1; updateUI(); }
+
+            ctx.restore();
+            
+            // Brillo
+            ctx.save();
+            ctx.translate(b.x, b.y);
+            let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 2, 0, 0, b.radius);
+            shine.addColorStop(0, 'rgba(255,255,255,0.8)');
+            shine.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = shine;
+            ctx.beginPath();
+            ctx.arc(0, 0, b.radius - 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
         }
-    }
 
-    function draw() {
-        ctx.fillStyle = '#5d4037'; ctx.fillRect(0, 0, W, H);
-        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 2;
-        ctx.strokeRect(15, 15, W-30, H-30);
-        ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
-        ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
-        ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.textAlign = 'center';
-        ctx.font = 'bold 26px Arial'; ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 45); 
-        ctx.font = 'bold 20px Arial'; ctx.fillText('JUGADOR 1', W*0.25, 60); ctx.fillText('JUGADOR 2', W*0.75, 60);
-        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
-        ctx.strokeRect(-10, H/2-60, 35, 120); ctx.strokeRect(W-25, H/2-60, 35, 120);
-        pins.forEach(p => { ctx.fillStyle = '#212121'; ctx.beginPath(); ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2); ctx.fill(); });
-        if (isDragging) {
-            ctx.beginPath(); ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)'; 
-            ctx.setLineDash([5,5]); ctx.lineWidth = 3;
-            ctx.moveTo(ball.x, ball.y); ctx.lineTo(ball.x + (ball.x - dragCurrent.x), ball.y + (ball.y - dragCurrent.y));
-            ctx.stroke(); ctx.setLineDash([]);
-        }
-        drawMarble(ball); update(); requestAnimationFrame(draw);
-    }
-
-    function startGame() {
-        document.getElementById('splash-screen').style.display = 'none';
-        gameActive = true; startTimer();
-    }
-
-    function startTimer() {
-        if(timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
+        // ============ ACTUALIZAR FÍSICA ============
+        function update() {
             if (!gameActive) return;
-            timeLeft--; document.getElementById('timer').innerText = timeLeft;
-            if (timeLeft <= 0) endGame();
-        }, 1000);
-    }
+            
+            if (isMoving) {
+                const speed = Math.hypot(ball.vx, ball.vy);
+                ball.angle += speed * 0.1;
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+                ball.vx *= PHYSICS.friction;
+                ball.vy *= PHYSICS.friction;
 
-    function resetBallPosition() {
-        isMoving = false; ball.vx = 0; ball.vy = 0;
-        ball.x = currentPlayer === 1 ? 65 : W - 65; ball.y = H/2;
-        updateUI();
-    }
+                // Bordes superior e inferior
+                if (ball.y < ball.radius) {
+                    ball.vy = Math.abs(ball.vy) * PHYSICS.wallBounce;
+                    ball.y = ball.radius;
+                }
+                if (ball.y > H - ball.radius) {
+                    ball.vy = -Math.abs(ball.vy) * PHYSICS.wallBounce;
+                    ball.y = H - ball.radius;
+                }
+                
+                // Detección de goles
+                const goalZone = 70;
+                const isGoalLeft = (ball.x < 30 && Math.abs(ball.y - H/2) < goalZone);
+                const isGoalRight = (ball.x > W - 30 && Math.abs(ball.y - H/2) < goalZone);
+                
+                if (isGoalLeft) {
+                    score[1]++;  // Gol del jugador 2
+                    currentPlayer = 1;
+                    updateUI();
+                    resetBallPosition();
+                    return;
+                }
+                if (isGoalRight) {
+                    score[0]++;  // Gol del jugador 1
+                    currentPlayer = 2;
+                    updateUI();
+                    resetBallPosition();
+                    return;
+                }
+                
+                // Paredes laterales (fuera de portería)
+                if (ball.x < ball.radius) {
+                    ball.vx = Math.abs(ball.vx) * PHYSICS.wallBounce;
+                    ball.x = ball.radius;
+                }
+                if (ball.x > W - ball.radius) {
+                    ball.vx = -Math.abs(ball.vx) * PHYSICS.wallBounce;
+                    ball.x = W - ball.radius;
+                }
 
-    function updateUI() {
-        document.getElementById('score1').innerText = score[0];
-        document.getElementById('score2').innerText = score[1];
-        const t = document.getElementById('turnText');
-        t.innerText = `Turno: J${currentPlayer}`;
-        t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
-    }
+                // Colisión con pinos
+                pins.forEach(p => {
+                    const dx = ball.x - p.x;
+                    const dy = ball.y - p.y;
+                    const d = Math.hypot(dx, dy);
+                    if (d < ball.radius + PIN_RADIUS) {
+                        const ang = Math.atan2(dy, dx);
+                        const currentSpeed = Math.hypot(ball.vx, ball.vy);
+                        ball.vx = Math.cos(ang) * currentSpeed * PHYSICS.pinBounce;
+                        ball.vy = Math.sin(ang) * currentSpeed * PHYSICS.pinBounce;
+                        const overlap = (ball.radius + PIN_RADIUS) - d;
+                        ball.x += Math.cos(ang) * overlap;
+                        ball.y += Math.sin(ang) * overlap;
+                    }
+                });
 
-    function endGame() {
-        gameActive = false; clearInterval(timerInterval);
-        const vig = document.getElementById('winnerVignette');
-        let win = score[0] > score[1] ? "¡VICTORIA J1!" : (score[1] > score[0] ? "¡VICTORIA J2!" : "¡EMPATE!");
-        document.getElementById('winnerText').innerText = win;
-        vig.style.display = 'flex';
-    }
+                // Detener movimiento
+                if (Math.hypot(ball.vx, ball.vy) < 0.5) { 
+                    ball.vx = 0;
+                    ball.vy = 0;
+                    isMoving = false; 
+                    currentPlayer = (currentPlayer === 1) ? 2 : 1; 
+                    updateUI(); 
+                }
+            }
+        }
 
-    // SOLUCIÓN LISTENERS: Eventos movidos estrictamente al canvas y manejo de fin de arrastre corregido
-    function handleDown(e) { 
-        if(isMoving || !gameActive) return; 
-        let c = getCoords(e);
-        if(Math.hypot(c.x - ball.x, c.y - ball.y) < 60) { isDragging = true; dragCurrent = c; } 
-    }
-    function handleMove(e) { if(isDragging) { dragCurrent = getCoords(e); e.preventDefault(); } }
-    function handleUp() { 
-        if(!isDragging) return; 
-        ball.vx = (ball.x - dragCurrent.x) * PHYSICS.powerMult; 
-        ball.vy = (ball.y - dragCurrent.y) * PHYSICS.powerMult; 
-        isDragging = false; isMoving = true; 
-    }
+        // ============ DIBUJAR TODO ============
+        function draw() {
+            // Fondo
+            ctx.fillStyle = '#4e342e';
+            ctx.fillRect(0, 0, W, H);
+            
+            // Textura de césped
+            ctx.fillStyle = '#5d4037';
+            for(let i = 0; i < 300; i++) {
+                ctx.fillRect(Math.random() * W, Math.random() * H, 2, 1);
+            }
+            
+            // Líneas de la cancha
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(15, 15, W-30, H-30);
+            
+            ctx.beginPath();
+            ctx.moveTo(W/2, 10);
+            ctx.lineTo(W/2, H-10);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(W/2, H/2, 60, 0, Math.PI*2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(W/2, H/2, 30, 0, Math.PI*2);
+            ctx.stroke();
 
-    canvas.addEventListener('mousedown', handleDown);
-    canvas.addEventListener('touchstart', handleDown, {passive:false});
-    
-    // Los eventos de movimiento se quedan en window para permitir que el dedo se salga del canvas sin perder el tiro
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleUp);
-    window.addEventListener('touchmove', handleMove, {passive:false});
-    window.addEventListener('touchend', handleUp);
+            // Textos
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 20px "Segoe UI", Arial';
+            ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 30);
+            ctx.font = 'bold 18px "Segoe UI", Arial';
+            ctx.fillStyle = (currentPlayer === 1 && !isMoving) ? 'var(--p1)' : '#aaa';
+            ctx.fillText('JUGADOR 1', W*0.25, 45);
+            ctx.fillStyle = (currentPlayer === 2 && !isMoving) ? 'var(--p2)' : '#aaa';
+            ctx.fillText('JUGADOR 2', W*0.75, 45);
 
-    initField(); updateUI(); draw();
+            // Porterías
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(-5, H/2-60, 30, 120);
+            ctx.strokeRect(W-25, H/2-60, 30, 120);
+            
+            // Red
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 1.5;
+            for(let i = -50; i <= 50; i+=15) {
+                ctx.beginPath();
+                ctx.moveTo(0, H/2 + i);
+                ctx.lineTo(25, H/2 + i);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(W-25, H/2 + i);
+                ctx.lineTo(W, H/2 + i);
+                ctx.stroke();
+            }
+
+            // Pinos
+            pins.forEach(p => {
+                ctx.fillStyle = '#1a1a1a';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#555';
+                ctx.beginPath();
+                ctx.arc(p.x-1, p.y-1, 2, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Indicador de arrastre
+            const isDragging = touchDrag || mouseDrag;
+            if (isDragging && !isMoving && gameActive) {
+                const dx = ball.x - dragCurrent.x;
+                const dy = ball.y - dragCurrent.y;
+                const force = Math.min(Math.hypot(dx, dy), 100);
+                
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(255, 215, 0, ${0.4 + force/150})`;
+                ctx.setLineDash([6, 10]);
+                ctx.lineWidth = 3;
+                ctx.moveTo(ball.x, ball.y);
+                ctx.lineTo(ball.x + dx * 1.8, ball.y + dy * 1.8);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                ctx.fillStyle = `rgba(255, 215, 0, ${0.25 + force/200})`;
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, 18 + force/4, 0, Math.PI*2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#ffd700';
+                ctx.font = 'bold 14px Arial';
+                ctx.shadowBlur = 0;
+                ctx.fillText(`💪 ${Math.round(force)}%`, ball.x + 22, ball.y - 12);
+            }
+
+            drawMarble(ball);
+            update();
+            requestAnimationFrame(draw);
+        }
+
+        // ============ FUNCIONES DEL JUEGO ============
+        function startGame() {
+            // Ocultar splash
+            const splash = document.getElementById('splash-screen');
+            splash.style.display = 'none';
+            
+            // Activar juego
+            gameActive = true;
+            score = [0, 0];
+            currentPlayer = 1;
+            timeLeft = 60;
+            isMoving = false;
+            touchDrag = false;
+            mouseDrag = false;
+            
+            updateUI();
+            resetBallPosition();
+            startTimer();
+            
+            // SOLICITAR PANTALLA COMPLETA AUTOMÁTICAMENTE
+            setTimeout(() => {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => {
+                        console.log("Fullscreen no disponible automático:", err);
+                    });
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            }, 100); // Pequeño delay para asegurar que el DOM está listo
+        }
+
+        function startTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!gameActive) return;
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    document.getElementById('timer').innerText = timeLeft;
+                    if (timeLeft <= 0) endGame();
+                }
+            }, 1000);
+        }
+
+        function resetBallPosition() {
+            isMoving = false;
+            touchDrag = false;
+            mouseDrag = false;
+            ball.vx = 0;
+            ball.vy = 0;
+            ball.angle = 0;
+            ball.x = currentPlayer === 1 ? 65 : W - 65;
+            ball.y = H/2;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('score1').innerText = score[0];
+            document.getElementById('score2').innerText = score[1];
+            const t = document.getElementById('turnText');
+            t.innerText = `🎯 Turno: J${currentPlayer}`;
+            t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
+            document.getElementById('timer').innerText = timeLeft;
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            const vig = document.getElementById('winnerVignette');
+            let winText = score[0] > score[1] ? "🏆 VICTORIA JUGADOR 1 🏆" : 
+                          (score[1] > score[0] ? "🏆 VICTORIA JUGADOR 2 🏆" : "🤝 EMPATE 🤝");
+            document.getElementById('winnerText').innerHTML = winText;
+            vig.style.display = 'flex';
+        }
+
+        function resetGame() {
+            if(timerInterval) clearInterval(timerInterval);
+            score = [0, 0];
+            currentPlayer = 1;
+            timeLeft = 60;
+            gameActive = true;
+            isMoving = false;
+            touchDrag = false;
+            mouseDrag = false;
+            resetBallPosition();
+            updateUI();
+            startTimer();
+            document.getElementById('winnerVignette').style.display = 'none';
+        }
+
+        // ============ EVENTOS TÁCTILES ============
+        function onTouchStart(e) {
+            e.preventDefault();
+            if(isMoving || !gameActive) return;
+            
+            const coords = getCoordsFromEvent(e, true);
+            if(Math.hypot(coords.x - ball.x, coords.y - ball.y) < 55) {
+                touchDrag = true;
+                dragCurrent = coords;
+            }
+        }
+        
+        function onTouchMove(e) {
+            if(!touchDrag || isMoving || !gameActive) return;
+            e.preventDefault();
+            dragCurrent = getCoordsFromEvent(e, true);
+        }
+        
+        function onTouchEnd(e) {
+            e.preventDefault();
+            if(!touchDrag || isMoving || !gameActive) {
+                touchDrag = false;
+                return;
+            }
+            
+            const dx = ball.x - dragCurrent.x;
+            const dy = ball.y - dragCurrent.y;
+            const force = Math.min(Math.hypot(dx, dy), 100);
+            
+            if(force > 8) {
+                ball.vx = dx * PHYSICS.powerMult;
+                ball.vy = dy * PHYSICS.powerMult;
+                isMoving = true;
+            }
+            touchDrag = false;
+        }
+        
+        // ============ EVENTOS DE RATÓN ============
+        function onMouseDown(e) {
+            e.preventDefault();
+            if(isMoving || !gameActive) return;
+            
+            const coords = getCoordsFromEvent(e, false);
+            if(Math.hypot(coords.x - ball.x, coords.y - ball.y) < 55) {
+                mouseDrag = true;
+                dragCurrent = coords;
+            }
+        }
+        
+        function onMouseMove(e) {
+            if(!mouseDrag || isMoving || !gameActive) return;
+            e.preventDefault();
+            dragCurrent = getCoordsFromEvent(e, false);
+        }
+        
+        function onMouseUp(e) {
+            if(!mouseDrag || isMoving || !gameActive) {
+                mouseDrag = false;
+                return;
+            }
+            
+            const dx = ball.x - dragCurrent.x;
+            const dy = ball.y - dragCurrent.y;
+            const force = Math.min(Math.hypot(dx, dy), 100);
+            
+            if(force > 8) {
+                ball.vx = dx * PHYSICS.powerMult;
+                ball.vy = dy * PHYSICS.powerMult;
+                isMoving = true;
+            }
+            mouseDrag = false;
+        }
+
+        // ============ CONFIGURAR EVENTOS ============
+        function setupEvents() {
+            // Touch events
+            canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+            canvas.addEventListener('touchend', onTouchEnd);
+            canvas.addEventListener('touchcancel', onTouchEnd);
+            
+            // Mouse events
+            canvas.addEventListener('mousedown', onMouseDown);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        }
+
+        function setupFullscreen() {
+            const btn = document.getElementById('fullscreenBtn');
+            if(btn) {
+                btn.addEventListener('click', () => {
+                    const elem = document.documentElement;
+                    if(elem.requestFullscreen) elem.requestFullscreen();
+                    else if(elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+                    else if(elem.msRequestFullscreen) elem.msRequestFullscreen();
+                });
+            }
+        }
+
+        // ============ INICIALIZACIÓN ============
+        function init() {
+            initField();
+            setupEvents();
+            setupFullscreen();
+            draw();
+            
+            document.getElementById('startBtn').onclick = startGame;
+            document.getElementById('resetGameBtn').onclick = resetGame;
+            document.getElementById('closeRotateBtn').onclick = () => {
+                document.getElementById('rotate-overlay').style.display = 'none';
+                document.querySelector('.game-wrapper').style.filter = 'none';
+                document.querySelector('.game-wrapper').style.pointerEvents = 'auto';
+            };
+            
+            updateUI();
+        }
+
+        // Iniciar todo cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
 </script>
 </body>
 </html>
