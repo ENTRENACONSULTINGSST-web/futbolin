@@ -16,10 +16,9 @@
             position: fixed;
             width: 100%;
             height: 100%;
-            touch-action: pan-x pan-y;
+            touch-action: none; /* IMPORTANTE: previene scroll/zoom durante el juego */
         }
 
-        /* Pantalla de carga/splash */
         #splash-screen {
             position: fixed;
             top: 0;
@@ -34,7 +33,6 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            backdrop-filter: blur(0px);
         }
 
         #splash-screen h1 {
@@ -47,10 +45,8 @@
         #splash-screen p {
             font-size: clamp(14px, 4vw, 18px);
             margin-bottom: 30px;
-            opacity: 0.9;
         }
 
-        /* Overlay de rotación (sugerencia no bloqueante) */
         #rotate-overlay {
             display: none;
             position: fixed;
@@ -65,7 +61,6 @@
             align-items: center;
             color: white;
             text-align: center;
-            backdrop-filter: blur(10px);
         }
         
         #rotate-overlay button {
@@ -79,7 +74,6 @@
             cursor: pointer;
         }
 
-        /* Mostrar sugerencia solo en portrait */
         @media (orientation: portrait) {
             #rotate-overlay { display: flex; }
             .game-wrapper { filter: blur(4px); pointer-events: none; }
@@ -90,7 +84,6 @@
             .game-wrapper { filter: none !important; pointer-events: auto !important; }
         }
 
-        /* Contenedor principal del juego */
         .game-wrapper {
             position: relative;
             width: 100vw;
@@ -115,7 +108,6 @@
             border: 3px solid #5d4037;
         }
 
-        /* Panel superior */
         .ui-top {
             display: flex;
             justify-content: space-between;
@@ -137,7 +129,6 @@
             font-size: clamp(14px, 3vh, 20px);
             text-align: center;
             white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
         .turn {
@@ -148,7 +139,6 @@
         .p1-active { background: var(--p1); box-shadow: 0 0 15px var(--p1); }
         .p2-active { background: var(--p2); box-shadow: 0 0 15px var(--p2); }
 
-        /* Wrapper del canvas */
         .canvas-wrapper {
             flex: 1;
             position: relative;
@@ -159,7 +149,6 @@
             background: #2a1a15;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
         }
 
         canvas {
@@ -173,7 +162,6 @@
             object-fit: contain;
         }
 
-        /* Barra de controles */
         .control-bar {
             display: flex;
             gap: 15px;
@@ -192,14 +180,12 @@
             border: none;
             background: var(--gold);
             color: #000;
-            transition: transform 0.1s, background 0.2s;
+            transition: transform 0.1s;
             font-family: inherit;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
         
-        .btn:active { transform: scale(0.95); background: #f9a825; }
+        .btn:active { transform: scale(0.95); }
 
-        /* Pantalla de ganador */
         #winnerVignette {
             display: none;
             position: absolute;
@@ -215,42 +201,23 @@
             align-items: center;
             color: white;
             text-align: center;
-            backdrop-filter: blur(8px);
         }
         
-        #winnerVignette h2 {
-            font-size: clamp(28px, 8vh, 56px);
-            margin-bottom: 20px;
-        }
-        
-        /* Responsive */
         @media (max-width: 768px) {
             .stat-box { padding: 6px 12px; font-size: 12px; }
             .turn { min-width: 100px; }
             .btn { padding: 6px 15px; font-size: 12px; }
-            .control-bar { gap: 10px; }
-            .game-container { padding: 8px; }
-        }
-        
-        @media (max-height: 450px) {
-            .stat-box { padding: 4px 10px; font-size: 11px; }
-            .turn { min-width: 85px; }
-            .control-bar { margin-top: 5px; }
-            .btn { padding: 4px 12px; font-size: 11px; }
-            .ui-top { margin-bottom: 5px; }
         }
     </style>
 </head>
 <body>
 
-<!-- Sugerencia de rotación (NO BLOQUEANTE) -->
 <div id="rotate-overlay">
     <div style="font-size: 70px;">🔄</div>
     <p style="margin: 20px; font-size: 18px;">GIRA tu dispositivo a horizontal para mejor experiencia</p>
     <button id="closeRotateBtn">CONTINUAR ASÍ</button>
 </div>
 
-<!-- Pantalla de inicio -->
 <div id="splash-screen">
     <div style="font-size: 14px; letter-spacing: 3px;">BIENVENIDOS A</div>
     <h1>ENTRENA CONSULTING SAS</h1>
@@ -258,12 +225,11 @@
     <button class="btn" id="startBtn" style="font-size: 18px; padding: 12px 35px;">▶ INICIAR DUELO</button>
 </div>
 
-<!-- Contenedor del juego -->
 <div class="game-wrapper">
     <div class="game-container">
         <div class="ui-top">
             <div id="turnText" class="stat-box turn p1-active">🎯 Turno: J1</div>
-            <div class="stat-box" style="color:var(--gold); background:#1a0f0c;">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
+            <div class="stat-box" style="color:var(--gold);">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
             <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
         </div>
 
@@ -273,12 +239,12 @@
 
         <div class="control-bar">
             <button class="btn" id="fullscreenBtn">⛶ Pantalla completa</button>
-            <button class="btn" id="resetGameBtn">🔄 Reiniciar partida</button>
+            <button class="btn" id="resetGameBtn">🔄 Reiniciar</button>
         </div>
 
         <div id="winnerVignette">
             <h2 id="winnerText"></h2>
-            <p style="margin-bottom: 25px; font-size: 18px;">Entrena Consulting SAS - SST</p>
+            <p style="margin-bottom: 25px;">Entrena Consulting SAS - SST</p>
             <button class="btn" onclick="location.reload()">🎮 JUGAR DE NUEVO</button>
         </div>
     </div>
@@ -286,20 +252,12 @@
 
 <script>
     (function() {
-        // Canvas y contexto
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const W = 800, H = 520;
 
-        // Configuración física
-        const PHYSICS = { 
-            friction: 0.988, 
-            wallBounce: 0.65, 
-            pinBounce: 0.82, 
-            powerMult: 0.14 
-        };
+        const PHYSICS = { friction: 0.988, wallBounce: 0.65, pinBounce: 0.82, powerMult: 0.14 };
         
-        // Variables del juego
         let score = [0, 0];
         let currentPlayer = 1;
         let timeLeft = 60;
@@ -307,31 +265,24 @@
         let gameActive = false;
         let timerInterval = null;
         
-        // Variables de arrastre (separadas para touch y mouse)
-        let touchDrag = false;
-        let mouseDrag = false;
+        // Variables de arrastre - GLOBALES para mantener el drag aunque el dedo salga del canvas
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
         let dragCurrent = { x: 0, y: 0 };
+        let isTouchDevice = false;
 
-        // Elementos del juego
         let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
         const pins = [];
         const PIN_RADIUS = 8;
 
-        // ============ FUNCIONES DE UTILIDAD ============
-        function getCoordsFromEvent(e, isTouch = true) {
+        // Detectar si es dispositivo táctil
+        isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+        // ============ FUNCIÓN CORREGIDA: obtener coordenadas relativas al canvas ============
+        function getCanvasCoords(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = W / rect.width;
             const scaleY = H / rect.height;
-            
-            let clientX, clientY;
-            
-            if (isTouch && e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
             
             let x = (clientX - rect.left) * scaleX;
             let y = (clientY - rect.top) * scaleY;
@@ -342,7 +293,6 @@
             };
         }
 
-        // ============ INICIALIZAR PINOS ============
         function initField() {
             pins.length = 0;
             const createFormation = (dir) => {
@@ -358,18 +308,15 @@
             createFormation(-1);
         }
 
-        // ============ DIBUJAR CANICA ============
         function drawMarble(b) {
             ctx.save();
             ctx.translate(b.x, b.y);
             
-            // Sombra
             ctx.fillStyle = 'rgba(0,0,0,0.25)';
             ctx.beginPath();
             ctx.arc(b.vx * 0.5, b.vy * 0.5 + 4, b.radius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Base
             ctx.beginPath();
             ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
             let g = ctx.createRadialGradient(-4, -4, 0, 0, 0, b.radius);
@@ -379,7 +326,6 @@
             ctx.fillStyle = g;
             ctx.fill();
 
-            // Bandas tricolor
             ctx.rotate(b.angle);
             const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
             tricolor.forEach((col, i) => {
@@ -396,7 +342,6 @@
 
             ctx.restore();
             
-            // Brillo
             ctx.save();
             ctx.translate(b.x, b.y);
             let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 2, 0, 0, b.radius);
@@ -409,7 +354,6 @@
             ctx.restore();
         }
 
-        // ============ ACTUALIZAR FÍSICA ============
         function update() {
             if (!gameActive) return;
             
@@ -421,7 +365,6 @@
                 ball.vx *= PHYSICS.friction;
                 ball.vy *= PHYSICS.friction;
 
-                // Bordes superior e inferior
                 if (ball.y < ball.radius) {
                     ball.vy = Math.abs(ball.vy) * PHYSICS.wallBounce;
                     ball.y = ball.radius;
@@ -431,27 +374,25 @@
                     ball.y = H - ball.radius;
                 }
                 
-                // Detección de goles
                 const goalZone = 70;
                 const isGoalLeft = (ball.x < 30 && Math.abs(ball.y - H/2) < goalZone);
                 const isGoalRight = (ball.x > W - 30 && Math.abs(ball.y - H/2) < goalZone);
                 
                 if (isGoalLeft) {
-                    score[1]++;  // Gol del jugador 2
+                    score[1]++;
                     currentPlayer = 1;
                     updateUI();
                     resetBallPosition();
                     return;
                 }
                 if (isGoalRight) {
-                    score[0]++;  // Gol del jugador 1
+                    score[0]++;
                     currentPlayer = 2;
                     updateUI();
                     resetBallPosition();
                     return;
                 }
                 
-                // Paredes laterales (fuera de portería)
                 if (ball.x < ball.radius) {
                     ball.vx = Math.abs(ball.vx) * PHYSICS.wallBounce;
                     ball.x = ball.radius;
@@ -461,7 +402,6 @@
                     ball.x = W - ball.radius;
                 }
 
-                // Colisión con pinos
                 pins.forEach(p => {
                     const dx = ball.x - p.x;
                     const dy = ball.y - p.y;
@@ -477,7 +417,6 @@
                     }
                 });
 
-                // Detener movimiento
                 if (Math.hypot(ball.vx, ball.vy) < 0.5) { 
                     ball.vx = 0;
                     ball.vy = 0;
@@ -488,19 +427,10 @@
             }
         }
 
-        // ============ DIBUJAR TODO ============
         function draw() {
-            // Fondo
             ctx.fillStyle = '#4e342e';
             ctx.fillRect(0, 0, W, H);
             
-            // Textura de césped
-            ctx.fillStyle = '#5d4037';
-            for(let i = 0; i < 300; i++) {
-                ctx.fillRect(Math.random() * W, Math.random() * H, 2, 1);
-            }
-            
-            // Líneas de la cancha
             ctx.strokeStyle = 'rgba(255,255,255,0.3)';
             ctx.lineWidth = 2;
             ctx.strokeRect(15, 15, W-30, H-30);
@@ -518,7 +448,6 @@
             ctx.arc(W/2, H/2, 30, 0, Math.PI*2);
             ctx.stroke();
 
-            // Textos
             ctx.fillStyle = 'rgba(255,255,255,0.9)';
             ctx.textAlign = 'center';
             ctx.font = 'bold 20px "Segoe UI", Arial';
@@ -529,13 +458,11 @@
             ctx.fillStyle = (currentPlayer === 2 && !isMoving) ? 'var(--p2)' : '#aaa';
             ctx.fillText('JUGADOR 2', W*0.75, 45);
 
-            // Porterías
             ctx.strokeStyle = '#FFFFFF';
             ctx.lineWidth = 4;
             ctx.strokeRect(-5, H/2-60, 30, 120);
             ctx.strokeRect(W-25, H/2-60, 30, 120);
             
-            // Red
             ctx.strokeStyle = 'rgba(255,255,255,0.4)';
             ctx.lineWidth = 1.5;
             for(let i = -50; i <= 50; i+=15) {
@@ -549,7 +476,6 @@
                 ctx.stroke();
             }
 
-            // Pinos
             pins.forEach(p => {
                 ctx.fillStyle = '#1a1a1a';
                 ctx.beginPath();
@@ -561,8 +487,7 @@
                 ctx.fill();
             });
 
-            // Indicador de arrastre
-            const isDragging = touchDrag || mouseDrag;
+            // Indicador de arrastre - FUNCIONA INCLUSO FUERA DEL CANVAS
             if (isDragging && !isMoving && gameActive) {
                 const dx = ball.x - dragCurrent.x;
                 const dy = ball.y - dragCurrent.y;
@@ -584,7 +509,6 @@
                 
                 ctx.fillStyle = '#ffd700';
                 ctx.font = 'bold 14px Arial';
-                ctx.shadowBlur = 0;
                 ctx.fillText(`💪 ${Math.round(force)}%`, ball.x + 22, ball.y - 12);
             }
 
@@ -593,38 +517,28 @@
             requestAnimationFrame(draw);
         }
 
-        // ============ FUNCIONES DEL JUEGO ============
         function startGame() {
-            // Ocultar splash
             const splash = document.getElementById('splash-screen');
             splash.style.display = 'none';
             
-            // Activar juego
             gameActive = true;
             score = [0, 0];
             currentPlayer = 1;
             timeLeft = 60;
             isMoving = false;
-            touchDrag = false;
-            mouseDrag = false;
+            isDragging = false;
             
             updateUI();
             resetBallPosition();
             startTimer();
             
-            // SOLICITAR PANTALLA COMPLETA AUTOMÁTICAMENTE
+            // Pantalla completa automática
             setTimeout(() => {
                 const elem = document.documentElement;
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen().catch(err => {
-                        console.log("Fullscreen no disponible automático:", err);
-                    });
-                } else if (elem.webkitRequestFullscreen) {
-                    elem.webkitRequestFullscreen();
-                } else if (elem.msRequestFullscreen) {
-                    elem.msRequestFullscreen();
-                }
-            }, 100); // Pequeño delay para asegurar que el DOM está listo
+                if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
+                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+                else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+            }, 100);
         }
 
         function startTimer() {
@@ -641,8 +555,7 @@
 
         function resetBallPosition() {
             isMoving = false;
-            touchDrag = false;
-            mouseDrag = false;
+            isDragging = false;
             ball.vx = 0;
             ball.vy = 0;
             ball.angle = 0;
@@ -677,36 +590,40 @@
             timeLeft = 60;
             gameActive = true;
             isMoving = false;
-            touchDrag = false;
-            mouseDrag = false;
+            isDragging = false;
             resetBallPosition();
             updateUI();
             startTimer();
             document.getElementById('winnerVignette').style.display = 'none';
         }
 
-        // ============ EVENTOS TÁCTILES ============
+        // ============ EVENTOS TÁCTILES CORREGIDOS - GLOBALES ============
         function onTouchStart(e) {
             e.preventDefault();
             if(isMoving || !gameActive) return;
             
-            const coords = getCoordsFromEvent(e, true);
+            const touch = e.touches[0];
+            const coords = getCanvasCoords(touch.clientX, touch.clientY);
+            
             if(Math.hypot(coords.x - ball.x, coords.y - ball.y) < 55) {
-                touchDrag = true;
+                isDragging = true;
+                dragStart = coords;
                 dragCurrent = coords;
             }
         }
         
         function onTouchMove(e) {
-            if(!touchDrag || isMoving || !gameActive) return;
+            if(!isDragging || isMoving || !gameActive) return;
             e.preventDefault();
-            dragCurrent = getCoordsFromEvent(e, true);
+            
+            const touch = e.touches[0];
+            dragCurrent = getCanvasCoords(touch.clientX, touch.clientY);
         }
         
         function onTouchEnd(e) {
             e.preventDefault();
-            if(!touchDrag || isMoving || !gameActive) {
-                touchDrag = false;
+            if(!isDragging || isMoving || !gameActive) {
+                isDragging = false;
                 return;
             }
             
@@ -719,7 +636,7 @@
                 ball.vy = dy * PHYSICS.powerMult;
                 isMoving = true;
             }
-            touchDrag = false;
+            isDragging = false;
         }
         
         // ============ EVENTOS DE RATÓN ============
@@ -727,22 +644,23 @@
             e.preventDefault();
             if(isMoving || !gameActive) return;
             
-            const coords = getCoordsFromEvent(e, false);
+            const coords = getCanvasCoords(e.clientX, e.clientY);
             if(Math.hypot(coords.x - ball.x, coords.y - ball.y) < 55) {
-                mouseDrag = true;
+                isDragging = true;
+                dragStart = coords;
                 dragCurrent = coords;
             }
         }
         
         function onMouseMove(e) {
-            if(!mouseDrag || isMoving || !gameActive) return;
+            if(!isDragging || isMoving || !gameActive) return;
             e.preventDefault();
-            dragCurrent = getCoordsFromEvent(e, false);
+            dragCurrent = getCanvasCoords(e.clientX, e.clientY);
         }
         
         function onMouseUp(e) {
-            if(!mouseDrag || isMoving || !gameActive) {
-                mouseDrag = false;
+            if(!isDragging || isMoving || !gameActive) {
+                isDragging = false;
                 return;
             }
             
@@ -755,21 +673,25 @@
                 ball.vy = dy * PHYSICS.powerMult;
                 isMoving = true;
             }
-            mouseDrag = false;
+            isDragging = false;
         }
 
-        // ============ CONFIGURAR EVENTOS ============
+        // ============ CONFIGURACIÓN DE EVENTOS ============
         function setupEvents() {
-            // Touch events
-            canvas.addEventListener('touchstart', onTouchStart, { passive: false });
-            canvas.addEventListener('touchmove', onTouchMove, { passive: false });
-            canvas.addEventListener('touchend', onTouchEnd);
-            canvas.addEventListener('touchcancel', onTouchEnd);
+            // Touch events - IMPORTANTE: usar window para capturar fuera del canvas
+            window.addEventListener('touchstart', onTouchStart, { passive: false });
+            window.addEventListener('touchmove', onTouchMove, { passive: false });
+            window.addEventListener('touchend', onTouchEnd);
+            window.addEventListener('touchcancel', onTouchEnd);
             
             // Mouse events
             canvas.addEventListener('mousedown', onMouseDown);
             window.addEventListener('mousemove', onMouseMove);
             window.addEventListener('mouseup', onMouseUp);
+            
+            // Prevenir comportamiento por defecto en canvas
+            canvas.addEventListener('dragstart', (e) => e.preventDefault());
+            canvas.addEventListener('selectstart', (e) => e.preventDefault());
         }
 
         function setupFullscreen() {
@@ -779,12 +701,10 @@
                     const elem = document.documentElement;
                     if(elem.requestFullscreen) elem.requestFullscreen();
                     else if(elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                    else if(elem.msRequestFullscreen) elem.msRequestFullscreen();
                 });
             }
         }
 
-        // ============ INICIALIZACIÓN ============
         function init() {
             initField();
             setupEvents();
@@ -802,7 +722,6 @@
             updateUI();
         }
 
-        // Iniciar todo cuando el DOM esté listo
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
