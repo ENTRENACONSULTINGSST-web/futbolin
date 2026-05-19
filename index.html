@@ -39,45 +39,82 @@
             justify-content: center; align-items: center; text-align: center;
         }
 
-        .game-container {
-            position: relative; display: flex; flex-direction: column;
-            width: 95vw; max-width: 800px;
-            background: #3e2723; padding: 10px; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 4px solid #2d1b18;
+.game-container {
+            position: relative; 
+            display: flex; 
+            flex-direction: column;
+            width: 95vw; 
+            max-width: 820px;
+            max-height: 98vh; /* Evita que el tablero sea más alto que la pantalla */
+            background: #3e2723; 
+            padding: 8px; 
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+            border: 4px solid #2d1b18;
+            overflow: hidden;
         }
 
         .ui-top {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 8px; color: #fff; width: 100%;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-bottom: 6px; 
+            color: #fff; 
+            width: 100%;
+            flex-shrink: 0; /* IMPORTANTE: Impide que la barra desaparezca */
         }
 
         .stat-box {
-            background: #2d1b18; padding: 5px 15px; border-radius: 15px;
-            font-weight: bold; font-size: 14px; border: 1px solid #5d4037;
+            background: #2d1b18; 
+            padding: 4px 12px; 
+            border-radius: 15px;
+            font-weight: bold; 
+            font-size: clamp(10px, 2.5vh, 14px); /* Texto responsivo */
+            border: 1px solid #5d4037;
         }
 
-        .turn { transition: 0.3s; padding: 5px 20px; border-radius: 15px; }
-        .p1-active { background: var(--p1); box-shadow: 0 0 12px var(--p1); }
-        .p2-active { background: var(--p2); box-shadow: 0 0 12px var(--p2); }
+        .turn { transition: 0.3s; padding: 4px 15px; border-radius: 15px; }
+        .p1-active { background: var(--p1); box-shadow: 0 0 10px var(--p1); }
+        .p2-active { background: var(--p2); box-shadow: 0 0 10px var(--p2); }
 
         canvas {
-            display: block; background: #bcaaa4; border-radius: 5px;
-            cursor: crosshair; touch-action: none; 
-            width: 100%; height: auto; aspect-ratio: 800 / 520;
+            display: block; 
+            background: #bcaaa4; 
+            border-radius: 5px;
+            cursor: crosshair; 
+            touch-action: none; 
+            width: 100%; 
+            height: auto;
+            max-height: 72vh; /* Limita el alto del área de juego en celulares bajos */
+            object-fit: contain;
+            aspect-ratio: 800 / 520;
         }
 
         #winnerVignette {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 100; border-radius: 10px;
-            flex-direction: column; justify-content: center; align-items: center; color: white;
+            display: none; 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); 
+            z-index: 100; 
+            border-radius: 10px;
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            color: white;
             text-align: center;
         }
         
         .btn {
-            padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer;
-            border-radius: 30px; border: none; background: var(--gold); color: #000;
-        }
-    </style>
+            padding: 10px 20px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer;
+            border-radius: 30px; 
+            border: none; 
+            background: var(--gold); 
+            color: #000;
+        }    </style>
 </head>
 <body>
 
