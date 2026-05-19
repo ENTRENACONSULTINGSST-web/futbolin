@@ -14,15 +14,13 @@
             font-family: 'Segoe UI', Arial, sans-serif; height: 100vh;
         }
 
-        /* Pantalla de Inicio / Branding */
+        /* Pantalla de Inicio */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, #2e7d32, #1a1a1a);
             color: white; z-index: 2000; display: flex; flex-direction: column;
             justify-content: center; align-items: center; text-align: center;
         }
-        #splash-screen h1 { font-size: 2.2rem; margin: 10px 0; color: var(--gold); }
-        #splash-screen p { font-size: 1rem; margin-bottom: 25px; opacity: 0.9; }
 
         /* Mensaje de Rotación */
         #rotate-screen {
@@ -35,31 +33,37 @@
             .game-container { display: none; }
         }
 
+        /* CONTENEDOR PRINCIPAL - CORRECCIÓN DE VISIBILIDAD */
         .game-container {
-            background: #3e2723; padding: 10px; border-radius: 15px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.9); border: 4px solid #2d1b18;
-            width: 98vw; max-width: 820px; position: relative;
-        }
-
-        canvas {
-            display: block; background: #bcaaa4; border-radius: 5px;
-            cursor: crosshair; touch-action: none; 
-            width: 100%; height: auto;
+            display: flex; flex-direction: column;
+            width: 95vw; max-width: 820px;
+            max-height: 98vh; /* Evita que se salga de la pantalla */
+            background: #3e2723; padding: 8px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 4px solid #2d1b18;
         }
 
         .ui-top {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 8px; color: #fff; width: 100%;
+            margin-bottom: 5px; color: #fff; width: 100%;
         }
 
         .stat-box {
-            background: #2d1b18; padding: 6px 15px; border-radius: 20px;
-            font-weight: bold; border: 1px solid #5d4037; font-size: 14px;
+            background: #2d1b18; padding: 4px 12px; border-radius: 15px;
+            font-weight: bold; border: 1px solid #5d4037; font-size: clamp(10px, 2.5vh, 14px);
         }
 
         .turn { transition: 0.3s; }
-        .p1-active { background: var(--p1); box-shadow: 0 0 10px var(--p1); }
-        .p2-active { background: var(--p2); box-shadow: 0 0 10px var(--p2); }
+        .p1-active { background: var(--p1); box-shadow: 0 0 8px var(--p1); }
+        .p2-active { background: var(--p2); box-shadow: 0 0 8px var(--p2); }
+
+        canvas {
+            display: block; background: #bcaaa4; border-radius: 5px;
+            cursor: crosshair; touch-action: none; 
+            width: 100%; 
+            height: auto; 
+            max-height: 70vh; /* AJUSTE CRÍTICO: limita el alto para que el UI no se pierda */
+            object-fit: contain;
+        }
 
         #winnerVignette {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -68,40 +72,38 @@
         }
         
         .btn {
-            padding: 12px 25px; font-size: 16px; font-weight: bold; cursor: pointer;
+            padding: 10px 20px; font-size: 16px; font-weight: bold; cursor: pointer;
             border-radius: 30px; border: none; background: var(--gold); color: #000;
-            transition: 0.3s;
         }
-        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
 <div id="rotate-screen">
     <div style="font-size: 50px;">🔄</div>
-    <p>GIRA TU DISPOSITIVO A HORIZONTAL</p>
+    <p>GIRA TU DISPOSITIVO</p>
 </div>
 
 <div id="splash-screen">
     <div style="font-size: 12px; letter-spacing: 2px;">BIENVENIDOS A</div>
-    <h1>ENTRENA CONSULTING SAS</h1>
-    <p>Consultores y Asesores SST</p>
+    <h1 style="color:var(--gold); margin:10px 0;">ENTRENA CONSULTING SAS</h1>
+    <p style="margin-bottom:20px;">Consultores y Asesores SST</p>
     <button class="btn" onclick="startGame()">INICIAR DUELO</button>
 </div>
 
 <div class="game-container">
     <div class="ui-top">
         <div id="turnText" class="stat-box turn p1-active">Turno: J1</div>
-        <div class="stat-box">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
+        <div class="stat-box" style="color:var(--gold)">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
         <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
     </div>
 
     <canvas id="gameCanvas" width="800" height="520"></canvas>
 
     <div id="winnerVignette">
-        <h2 id="winnerText" style="color:var(--gold); margin-bottom: 5px;"></h2>
-        <div style="font-size: 14px; margin-bottom: 20px; opacity: 0.8;">Entrena Consulting SAS - Expertos en SST</div>
-        <button class="btn" onclick="location.reload()">VOLVER A JUGAR</button>
+        <h2 id="winnerText" style="color:var(--gold)"></h2>
+        <p>Entrena Consulting SAS - Expertos en SST</p>
+        <button class="btn" onclick="location.reload()">REINICIAR</button>
     </div>
 </div>
 
@@ -140,12 +142,10 @@
         createFormation(1); createFormation(-1);
     }
 
-    // CORRECCIÓN DEFINITIVA DE DESFASE
     function getCoords(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
         return {
             x: (clientX - rect.left) * (W / rect.width),
             y: (clientY - rect.top) * (H / rect.height)
@@ -165,8 +165,7 @@
         ctx.save(); ctx.translate(b.x, b.y);
         let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 1, 0, 0, b.radius);
         shine.addColorStop(0, 'rgba(255,255,255,0.7)'); shine.addColorStop(1, 'rgba(0,0,0,0.1)');
-        ctx.fillStyle = shine;
-        ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2); ctx.fill();
         ctx.restore();
     }
 
@@ -199,7 +198,6 @@
                     ball.vy = Math.sin(ang) * s * PHYSICS.pinBounce;
                     ball.x = p.x + Math.cos(ang) * (ball.radius + PIN_RADIUS + 1.1);
                     ball.y = p.y + Math.sin(ang) * (ball.radius + PIN_RADIUS + 1.1);
-                    if(navigator.vibrate) navigator.vibrate(40);
                 }
             });
             if (speed < 0.22) { isMoving = false; currentPlayer = (currentPlayer === 1) ? 2 : 1; updateUI(); }
@@ -209,23 +207,17 @@
     function draw() {
         ctx.fillStyle = '#5d4037'; ctx.fillRect(0, 0, W, H);
         ctx.strokeStyle = 'rgba(0,0,0,0.05)';
-        for(let i=0; i<H; i+=25) { 
-            ctx.beginPath(); ctx.moveTo(0,i); ctx.quadraticCurveTo(W/2, i+10, W, i); ctx.stroke(); 
-        }
+        for(let i=0; i<H; i+=25) { ctx.beginPath(); ctx.moveTo(0,i); ctx.quadraticCurveTo(W/2, i+10, W, i); ctx.stroke(); }
 
         ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 2;
         ctx.strokeRect(10, 10, W-20, H-20);
         ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
         ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
 
-        // BRANDING ENTRENA CONSULTING
+        // BRANDING
         ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.textAlign = 'center';
-        ctx.font = 'bold 22px Arial'; ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 40);
-        ctx.font = '14px Arial'; ctx.fillText('Seguridad y Salud en el Trabajo', W/2, H - 22);
-
-        // Nombres Jugadores
-        ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.font = 'bold 20px Arial';
-        ctx.fillText('JUGADOR 1', W*0.25, 50); ctx.fillText('JUGADOR 2', W*0.75, 50);
+        ctx.font = 'bold 20px Arial'; ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 40);
+        ctx.font = 'bold 20px Arial'; ctx.fillText('JUGADOR 1', W*0.25, 50); ctx.fillText('JUGADOR 2', W*0.75, 50);
 
         // Arcos
         ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
@@ -245,21 +237,16 @@
         drawMarble(ball); update(); requestAnimationFrame(draw);
     }
 
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(e => console.log(e));
-        }
-    }
-
     function startGame() {
-        toggleFullScreen();
         document.getElementById('splash-screen').style.display = 'none';
         gameActive = true;
         if(audioCtx.state === 'suspended') audioCtx.resume();
         startTimer();
+        if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
     }
 
     function startTimer() {
+        if(timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             if (!gameActive) return;
             timeLeft--; document.getElementById('timer').innerText = timeLeft;
@@ -273,7 +260,6 @@
         let win = score[0] > score[1] ? "J1 GANADOR" : (score[1] > score[0] ? "J2 GANADOR" : "¡EMPATE!");
         document.getElementById('winnerText').innerText = win;
         vig.style.display = 'flex';
-        if (document.exitFullscreen) document.exitFullscreen().catch(e => {});
     }
 
     function resetBallPosition() {
@@ -287,7 +273,7 @@
         t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
     }
 
-    function handleDown(e) { if(isMoving || !gameActive) return; dragStart = getCoords(e); if(Math.hypot(dragStart.x - ball.x, dragStart.y - ball.y) < 55) { isDragging = true; dragCurrent = dragStart; } }
+    function handleDown(e) { if(isMoving || !gameActive) return; dragStart = getCoords(e); if(Math.hypot(dragStart.x - ball.x, dragStart.y - ball.y) < 60) { isDragging = true; dragCurrent = dragStart; } }
     function handleMove(e) { if(isDragging) { dragCurrent = getCoords(e); e.preventDefault(); } }
     function handleUp() { if(!isDragging) return; ball.vx = (ball.x - dragCurrent.x) * PHYSICS.powerMult; ball.vy = (ball.y - dragCurrent.y) * PHYSICS.powerMult; isDragging = false; isMoving = true; }
 
