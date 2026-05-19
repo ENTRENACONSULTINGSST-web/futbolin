@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <title>Futbolín - Entrena Consulting SAS</title>
     <style>
         :root { --p1: #d32f2f; --p2: #1976d2; --gold: #fbc02d; }
@@ -22,8 +21,8 @@
             color: white; z-index: 2000; display: flex; flex-direction: column;
             justify-content: center; align-items: center; text-align: center;
         }
-        #splash-screen h1 { font-size: 2.5rem; margin-bottom: 5px; color: var(--gold); }
-        #splash-screen p { font-size: 1.1rem; margin-bottom: 30px; opacity: 0.9; }
+        #splash-screen h1 { font-size: 2.2rem; margin: 10px 0; color: var(--gold); }
+        #splash-screen p { font-size: 1rem; margin-bottom: 25px; opacity: 0.9; }
 
         /* Mensaje de Rotación */
         #rotate-screen {
@@ -45,7 +44,7 @@
         canvas {
             display: block; background: #bcaaa4; border-radius: 5px;
             cursor: crosshair; touch-action: none; 
-            width: 100%; height: auto; /* IMPORTANTE para el desfase */
+            width: 100%; height: auto;
         }
 
         .ui-top {
@@ -73,6 +72,7 @@
             border-radius: 30px; border: none; background: var(--gold); color: #000;
             transition: 0.3s;
         }
+        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -82,7 +82,6 @@
     <p>GIRA TU DISPOSITIVO A HORIZONTAL</p>
 </div>
 
-<!-- PANTALLA INICIAL DE BRANDING -->
 <div id="splash-screen">
     <div style="font-size: 12px; letter-spacing: 2px;">BIENVENIDOS A</div>
     <h1>ENTRENA CONSULTING SAS</h1>
@@ -100,7 +99,7 @@
     <canvas id="gameCanvas" width="800" height="520"></canvas>
 
     <div id="winnerVignette">
-        <h2 id="winnerText" style="color:var(--gold)"></h2>
+        <h2 id="winnerText" style="color:var(--gold); margin-bottom: 5px;"></h2>
         <div style="font-size: 14px; margin-bottom: 20px; opacity: 0.8;">Entrena Consulting SAS - Expertos en SST</div>
         <button class="btn" onclick="location.reload()">VOLVER A JUGAR</button>
     </div>
@@ -141,19 +140,15 @@
         createFormation(1); createFormation(-1);
     }
 
-    // SOLUCIÓN AL DESFASE: Calcula coordenadas precisas
+    // CORRECCIÓN DEFINITIVA DE DESFASE
     function getCoords(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
-        // Relación entre el tamaño visual (CSS) y el tamaño lógico (800x520)
-        const scaleX = W / rect.width;
-        const scaleY = H / rect.height;
-        
         return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
+            x: (clientX - rect.left) * (W / rect.width),
+            y: (clientY - rect.top) * (H / rect.height)
         };
     }
 
@@ -170,7 +165,8 @@
         ctx.save(); ctx.translate(b.x, b.y);
         let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 1, 0, 0, b.radius);
         shine.addColorStop(0, 'rgba(255,255,255,0.7)'); shine.addColorStop(1, 'rgba(0,0,0,0.1)');
-        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = shine;
+        ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2); ctx.fill();
         ctx.restore();
     }
 
@@ -201,8 +197,8 @@
                     const ang = Math.atan2(dy, dx), s = Math.hypot(ball.vx, ball.vy);
                     ball.vx = Math.cos(ang) * s * PHYSICS.pinBounce;
                     ball.vy = Math.sin(ang) * s * PHYSICS.pinBounce;
-                    ball.x = p.x + Math.cos(ang) * (ball.radius + PIN_RADIUS + 1);
-                    ball.y = p.y + Math.sin(ang) * (ball.radius + PIN_RADIUS + 1);
+                    ball.x = p.x + Math.cos(ang) * (ball.radius + PIN_RADIUS + 1.1);
+                    ball.y = p.y + Math.sin(ang) * (ball.radius + PIN_RADIUS + 1.1);
                     if(navigator.vibrate) navigator.vibrate(40);
                 }
             });
@@ -214,22 +210,18 @@
         ctx.fillStyle = '#5d4037'; ctx.fillRect(0, 0, W, H);
         ctx.strokeStyle = 'rgba(0,0,0,0.05)';
         for(let i=0; i<H; i+=25) { 
-            ctx.beginPath(); ctx.moveTo(0,i); 
-            ctx.quadraticCurveTo(W/2, i+10, W, i); ctx.stroke(); 
+            ctx.beginPath(); ctx.moveTo(0,i); ctx.quadraticCurveTo(W/2, i+10, W, i); ctx.stroke(); 
         }
 
-        // --- CANCHA ---
         ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 2;
         ctx.strokeRect(10, 10, W-20, H-20);
         ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
         ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
 
-        // BRANDING EN CANCHA
+        // BRANDING ENTRENA CONSULTING
         ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.textAlign = 'center';
-        ctx.font = 'bold 22px Arial';
-        ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 40);
-        ctx.font = '14px Arial';
-        ctx.fillText('Seguridad y Salud en el Trabajo', W/2, H - 22);
+        ctx.font = 'bold 22px Arial'; ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 40);
+        ctx.font = '14px Arial'; ctx.fillText('Seguridad y Salud en el Trabajo', W/2, H - 22);
 
         // Nombres Jugadores
         ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.font = 'bold 20px Arial';
@@ -253,7 +245,14 @@
         drawMarble(ball); update(); requestAnimationFrame(draw);
     }
 
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(e => console.log(e));
+        }
+    }
+
     function startGame() {
+        toggleFullScreen();
         document.getElementById('splash-screen').style.display = 'none';
         gameActive = true;
         if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -274,6 +273,7 @@
         let win = score[0] > score[1] ? "J1 GANADOR" : (score[1] > score[0] ? "J2 GANADOR" : "¡EMPATE!");
         document.getElementById('winnerText').innerText = win;
         vig.style.display = 'flex';
+        if (document.exitFullscreen) document.exitFullscreen().catch(e => {});
     }
 
     function resetBallPosition() {
@@ -287,8 +287,7 @@
         t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
     }
 
-    // EVENTOS UNIFICADOS
-    function handleDown(e) { if(isMoving || !gameActive) return; dragStart = getCoords(e); if(Math.hypot(dragStart.x - ball.x, dragStart.y - ball.y) < 50) isDragging = true; }
+    function handleDown(e) { if(isMoving || !gameActive) return; dragStart = getCoords(e); if(Math.hypot(dragStart.x - ball.x, dragStart.y - ball.y) < 55) { isDragging = true; dragCurrent = dragStart; } }
     function handleMove(e) { if(isDragging) { dragCurrent = getCoords(e); e.preventDefault(); } }
     function handleUp() { if(!isDragging) return; ball.vx = (ball.x - dragCurrent.x) * PHYSICS.powerMult; ball.vy = (ball.y - dragCurrent.y) * PHYSICS.powerMult; isDragging = false; isMoving = true; }
 
