@@ -3,347 +3,795 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- FIX WhatsApp/WebView: og tags para preview correcto -->
+    <meta property="og:title" content="Futbolín Tricolor – Entrena Consulting SAS">
+    <meta property="og:description" content="¡Duelo de Futbolín con comentarista IA! Expertos en SST.">
+    <meta property="og:type" content="website">
     <title>Futbolín Tricolor - Entrena Consulting SAS</title>
-
     <style>
+        /* ── FIX #1: variables CSS solo para HTML, NUNCA en canvas ctx ── */
         :root { --p1: #d32f2f; --p2: #1976d2; --gold: #fbc02d; }
-        * { user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body {
+        /* Colores como constantes JS también — ver script */
+
+        * { user-select: none; -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
             background: #0a0a0a;
             font-family: 'Segoe UI', Arial, sans-serif;
             overflow: hidden;
             position: fixed;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             touch-action: none;
         }
 
-        /* === OVERLAY DE ROTACIÓN CORREGIDO (TAMAÑO LEGIBLE) === */
-        #rotate-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); color: white; z-index: 5000;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 20px;
+        /* ── SPLASH ── */
+        #splash-screen {
+            position: fixed; inset: 0;
+            background: radial-gradient(circle, #1b5e20, #0a0a0a);
+            color: white; z-index: 2000;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            gap: 6px;
         }
-        
-        #rotate-overlay .icon { font-size: 80px; margin-bottom: 20px; }
-        #rotate-overlay p { font-size: 24px; font-weight: bold; margin-bottom: 10px; color: white; }
-        #rotate-overlay span { font-size: 16px; opacity: 0.8; margin-bottom: 30px; display: block; }
-        
-        #rotate-overlay button {
-            padding: 18px 40px; background: var(--gold);
-            border: none; border-radius: 50px; font-weight: bold;
-            font-size: 18px; cursor: pointer; color: black;
-            box-shadow: 0 4px 15px rgba(251, 192, 45, 0.4);
+        #splash-screen .eyebrow { font-size: 13px; letter-spacing: 3px; opacity: .6; }
+        #splash-screen h1 { color: var(--gold); font-size: clamp(22px,6vw,42px); margin: 8px 0; }
+        #splash-screen .sub { font-size: 16px; opacity: .85; margin-bottom: 8px; }
+        #splash-screen .ai-badge {
+            background: rgba(25,118,210,.2); border: 1px solid rgba(25,118,210,.5);
+            border-radius: 20px; padding: 5px 18px; font-size: 12px;
+            color: #90caf9; margin-bottom: 22px; letter-spacing: 1px;
         }
 
-        /* Mostrar solo en vertical */
+        /* ── GANADOR ── */
+        #winnerVignette {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.97); color: white;
+            z-index: 100; display: none;
+            flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; gap: 12px; padding: 20px;
+        }
+        #winnerVignette h2 { font-size: clamp(28px,6vw,46px); color: var(--gold); }
+        #ai-summary {
+            background: rgba(25,118,210,.12); border: 1px solid rgba(25,118,210,.3);
+            border-radius: 10px; padding: 12px 20px; font-size: 14px; color: #90caf9;
+            max-width: 400px; line-height: 1.6; text-align: left;
+        }
+
+        /* ── ROTATE OVERLAY ── */
+        #rotate-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.95); color: white;
+            z-index: 3000; display: none;
+            flex-direction: column; justify-content: center;
+            align-items: center; text-align: center;
+        }
+        #rotate-overlay button {
+            margin-top: 30px; padding: 15px 40px;
+            background: var(--gold); border: none; border-radius: 50px;
+            font-weight: bold; font-size: 18px; cursor: pointer; min-width: 200px;
+        }
         @media (orientation: portrait) { #rotate-overlay { display: flex; } }
 
-        /* === PANTALLAS DE INTERFAZ === */
-        #splash-screen, #winnerVignette {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; z-index: 2000;
+        /* ── LAYOUT ── */
+        .game-wrapper {
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background: #0a0a0a;
         }
-
-        #splash-screen { background: radial-gradient(circle, #1b5e20, #0a0a0a); color: white; }
-        #winnerVignette { background: rgba(0,0,0,0.97); color: white; display: none; z-index: 2500; }
-
-        h1 { color: var(--gold); margin: 20px 0; font-size: clamp(28px, 7vw, 48px); text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        
-        .game-wrapper { width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
-
         .game-container {
             display: flex; flex-direction: column;
-            width: 98%; height: 98%; max-width: 1200px;
-            background: #3e2723; padding: 12px; border-radius: 20px;
-            border: 3px solid #5d4037; position: relative;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            width: 98%; height: 98%;
+            max-width: 1200px;
+            background: #3e2723; padding: 12px;
+            border-radius: 20px; border: 3px solid #5d4037;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,.5);
         }
 
+        /* ── HUD ── */
         .ui-top {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px; color: #fff; width: 100%; flex-shrink: 0; gap: 15px;
+            margin-bottom: 8px; color: #fff; width: 100%;
+            flex-shrink: 0; gap: 10px; padding: 0 4px;
         }
-
         .stat-box {
-            background: #2d1b18; padding: 10px 20px; border-radius: 40px;
+            background: #2d1b18; padding: 8px 16px; border-radius: 40px;
             font-weight: bold; border: 1px solid #5d4037;
-            font-size: clamp(14px, 4vh, 22px); min-width: 100px; text-align: center;
+            font-size: clamp(13px,2.5vh,19px); min-width: 95px;
+            text-align: center; white-space: nowrap;
         }
+        .turn { transition: .3s; min-width: 130px; }
+        /* FIX #1: colores hex directos, nunca var() en .className dinámico del canvas */
+        .p1-active { background: #d32f2f; box-shadow: 0 0 14px #d32f2f; }
+        .p2-active { background: #1976d2; box-shadow: 0 0 14px #1976d2; }
 
-        .turn { transition: 0.3s; min-width: 140px; }
-        .p1-active { background: var(--p1); box-shadow: 0 0 15px var(--p1); }
-        .p2-active { background: var(--p2); box-shadow: 0 0 15px var(--p2); }
-
+        /* ── CANVAS AREA ── */
         .canvas-wrapper {
-            flex: 1; position: relative; display: flex; justify-content: center;
-            align-items: center; background: #2a1a15; border-radius: 15px; overflow: hidden;
+            flex: 1; position: relative;
+            display: flex; justify-content: center; align-items: center;
+            background: #2a1a15; border-radius: 15px;
+            overflow: hidden; min-height: 0;
+        }
+        canvas {
+            max-width: 100%; max-height: 100%;
+            object-fit: contain; background: #bcaaa4;
+            border-radius: 10px; cursor: crosshair; touch-action: none;
+            display: block;
         }
 
-        canvas { max-width: 100%; max-height: 100%; object-fit: contain; background: #bcaaa4; cursor: crosshair; }
-
-        .control-bar { display: flex; gap: 15px; margin-top: 10px; justify-content: center; flex-shrink: 0; }
-
+        /* ── CONTROL BAR ── */
+        /* FIX #4: flex-wrap + max-height para no desbordar en landscape pequeño */
+        .control-bar {
+            display: flex; gap: 10px; margin-top: 8px;
+            justify-content: center; flex-wrap: wrap; flex-shrink: 0;
+            max-height: 60px; overflow: hidden;
+        }
         .btn {
-            padding: 12px 28px; font-size: 15px; font-weight: bold; cursor: pointer;
-            border-radius: 40px; border: none; background: var(--gold); color: #000;
-            min-width: 140px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            padding: 10px 24px; font-size: clamp(12px,1.8vh,15px); font-weight: bold;
+            cursor: pointer; border-radius: 40px; border: none;
+            background: var(--gold); color: #000; transition: transform .1s;
+            font-family: inherit; min-width: 120px; white-space: nowrap;
         }
+        .btn:active { transform: scale(.95); }
+
+        /* ── AI PANEL ── */
+        #ai-panel {
+            display: flex; align-items: center; gap: 10px;
+            background: #1a1a2e; border: 1px solid rgba(25,118,210,.3);
+            border-radius: 10px; padding: 7px 14px; margin-top: 8px;
+            flex-shrink: 0; min-height: 42px;
+        }
+        .ai-dot {
+            width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg,#1565c0,#0d47a1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; box-shadow: 0 0 8px rgba(25,118,210,.5);
+        }
+        #ai-comment { font-size: 13px; color: #90caf9; flex: 1; line-height: 1.4; }
+        #ai-comment .cur {
+            display: inline-block; width: 7px; height: 13px; background: #90caf9;
+            margin-left: 2px; vertical-align: middle; animation: blink .7s infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        /* ── FLASH GOL ── */
+        #goal-flash {
+            position: absolute; inset: 0; pointer-events: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(34px,8vw,72px); font-weight: 900;
+            opacity: 0; letter-spacing: 3px; z-index: 10;
+        }
+        @keyframes gflash {
+            0%  { opacity:0; transform:scale(.3); }
+            30% { opacity:1; transform:scale(1.1); }
+            70% { opacity:1; transform:scale(1); }
+            100%{ opacity:0; transform:scale(.8); }
+        }
+        #goal-flash.show { animation: gflash 1.1s ease forwards; }
+
+        .watermark {
+            position: absolute; bottom: 14px; right: 18px;
+            font-size: 11px; color: rgba(255,255,255,.25);
+            pointer-events: none; font-family: monospace; z-index: 1;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .stat-box { padding: 6px 10px; }
+            .turn { min-width: 105px; }
+            .btn { padding: 8px 16px; min-width: 105px; }
+            #ai-panel { padding: 5px 10px; }
+        }
+        /* FIX #4: en landscape muy corto ocultar ai-panel para no desbordar */
+        @media (max-height: 420px) { #ai-panel { display: none; } }
     </style>
 </head>
 <body>
 
+<!-- ROTATE OVERLAY -->
 <div id="rotate-overlay">
-    <div class="icon">🔄</div>
-    <p>GIRA TU DISPOSITIVO</p>
-    <span>Usa el modo horizontal para jugar mejor</span>
-    <button onclick="document.getElementById('rotate-overlay').style.display='none'">CONTINUAR ASÍ</button>
+    <div style="font-size:70px;">🔄</div>
+    <p style="margin:20px;font-size:22px;font-weight:bold;">GIRA TU DISPOSITIVO</p>
+    <p style="font-size:16px;">a horizontal para mejor experiencia</p>
+    <button id="ignoreRotateBtn">CONTINUAR ASÍ</button>
 </div>
 
+<!-- SPLASH -->
 <div id="splash-screen">
-    <div style="font-size: 14px; letter-spacing: 4px; opacity: 0.8;">BIENVENIDOS A</div>
+    <div class="eyebrow">BIENVENIDOS A</div>
     <h1>ENTRENA CONSULTING SAS</h1>
-    <p style="margin-bottom: 40px; font-size: 20px; opacity: 0.9;">Expertos en Seguridad y Salud en el Trabajo</p>
-    <button class="btn" onclick="startGame()" style="font-size: 22px; padding: 18px 50px;">▶ INICIAR DUELO</button>
+    <p class="sub">Expertos en Seguridad y Salud en el Trabajo</p>
+    <div class="ai-badge">⚡ Comentarista deportivo con Claude AI</div>
+    <button class="btn" id="startBtn" style="font-size:20px;padding:15px 45px;">▶ INICIAR DUELO</button>
 </div>
 
+<!-- JUEGO -->
 <div class="game-wrapper">
     <div class="game-container">
+
         <div class="ui-top">
             <div id="turnText" class="stat-box turn p1-active">🎯 Turno: J1</div>
-            <div class="stat-box" style="color:var(--gold);">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
+            <div class="stat-box" style="color:#fbc02d;">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
             <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
         </div>
 
         <div class="canvas-wrapper">
             <canvas id="gameCanvas" width="800" height="520"></canvas>
+            <div id="goal-flash"></div>
         </div>
 
         <div class="control-bar">
-            <button class="btn" onclick="toggleFS()">⛶ Pantalla completa</button>
-            <button class="btn" onclick="location.reload()">🔄 Reiniciar</button>
+            <button class="btn" id="fullscreenBtn">⛶ Pantalla completa</button>
+            <button class="btn" id="resetGameBtn">🔄 Reiniciar</button>
         </div>
 
-        <div id="winnerVignette">
-            <h2 id="winnerText" style="font-size: 48px; color: var(--gold); margin-bottom: 20px;"></h2>
-            <p style="margin-bottom: 30px; font-size: 20px; opacity: 0.8;">Entrena Consulting SAS - SST</p>
-            <button class="btn" onclick="location.reload()" style="font-size: 20px; padding: 15px 40px;">🎮 JUGAR DE NUEVO</button>
+        <!-- AI PANEL -->
+        <div id="ai-panel">
+            <div class="ai-dot">⚡</div>
+            <div id="ai-comment">Comentarista IA listo para el duelo...</div>
         </div>
+
+        <div class="watermark">ENTRENA CONSULTING SAS • SST</div>
+
+        <!-- GANADOR -->
+        <div id="winnerVignette">
+            <h2 id="winnerText"></h2>
+            <div id="ai-summary">⚡ Generando análisis del partido...</div>
+            <p style="font-size:14px;opacity:.6;margin-top:4px;">Entrena Consulting SAS - Expertos en SST</p>
+            <button class="btn" id="playAgainBtn" style="margin-top:8px;">🎮 JUGAR DE NUEVO</button>
+        </div>
+
     </div>
 </div>
 
 <script>
-(function() {
+(function () {
+    // ═══════════════════════════════════════════════════
+    //  FIX #1 — Colores como constantes JS (Canvas no
+    //  puede leer variables CSS del tipo var(--p1))
+    // ═══════════════════════════════════════════════════
+    const COLOR_P1   = '#d32f2f';
+    const COLOR_P2   = '#1976d2';
+    const COLOR_GOLD = '#fbc02d';
+
     const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    const ctx    = canvas.getContext('2d');
     const W = 800, H = 520;
 
+    // FIX física: sin gravedad, igual al original de referencia
     const PHYSICS = { friction: 0.988, wallBounce: 0.65, pinBounce: 0.82, powerMult: 0.15 };
-    const COLORS = { p1: '#d32f2f', p2: '#1976d2', gold: '#fbc02d' };
-    
-    let score = [0, 0], currentPlayer = 1, timeLeft = 60, isMoving = false, gameActive = false;
-    let timerInterval = null, isDragging = false, dragCurrent = { x: 0, y: 0 };
+
+    let score = [0, 0], currentPlayer = 1, timeLeft = 60;
+    let isMoving = false, gameActive = false, timerInterval = null;
+    let isDragging = false, dragCurrent = { x: 0, y: 0 };
+    // FIX #2: flag para bloquear cambio automático de turno al anotar gol
+    let goalJustScored = false;
+    let gameLog = [];
 
     let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
-    const pins = [];
-    const PIN_RADIUS = 8;
+    const pins = [], PIN_RADIUS = 8;
 
-    function getCoords(e) {
+    // ═══════════════════════════════════════════════════
+    //  COORDENADAS — con clamp (del index-1.html)
+    // ═══════════════════════════════════════════════════
+    function getCanvasCoords(clientX, clientY) {
         const rect = canvas.getBoundingClientRect();
-        const cx = e.touches ? e.touches[0].clientX : e.clientX;
-        const cy = e.touches ? e.touches[0].clientY : e.clientY;
         return {
-            x: Math.min(Math.max(0, (cx - rect.left) * (W / rect.width)), W),
-            y: Math.min(Math.max(0, (cy - rect.top) * (H / rect.height)), H)
+            x: Math.min(Math.max(0, (clientX - rect.left) * (W / rect.width)), W),
+            y: Math.min(Math.max(0, (clientY - rect.top)  * (H / rect.height)), H)
         };
     }
+    function getCoordsFromEvent(e) {
+        const src = e.touches ? e.touches[0] : e;
+        return getCanvasCoords(src.clientX, src.clientY);
+    }
 
+    // ═══════════════════════════════════════════════════
+    //  CAMPO — idéntico al index-1.html
+    // ═══════════════════════════════════════════════════
     function initField() {
         pins.length = 0;
         const createFormation = (dir) => {
             const baseX = dir === 1 ? W * 0.1 : W * 0.9;
             const s = dir === 1 ? 75 : -75;
-            pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); 
-            [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s, y: H * p }));
-            [0.3, 0.5, 0.7].forEach(p => pins.push({ x: baseX + s * 2.5, y: H * p }));
+            pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 });
+            [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s,       y: H * p }));
+            [0.3, 0.5, 0.7].forEach(p =>     pins.push({ x: baseX + s * 2.5,  y: H * p }));
             pins.push({ x: baseX + s * 3.8, y: H/2 });
-            [0.38, 0.62].forEach(p => pins.push({ x: baseX + s * 5.2, y: H * p }));
+            [0.38, 0.62].forEach(p =>        pins.push({ x: baseX + s * 5.2,  y: H * p }));
         };
         createFormation(1); createFormation(-1);
     }
 
+    // ═══════════════════════════════════════════════════
+    //  AUDIO
+    // ═══════════════════════════════════════════════════
+    let audioCtx = null;
+    function getAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+    function playGoalSound() {
+        try {
+            const a = getAudio();
+            const osc = a.createOscillator(), gain = a.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(400, a.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, a.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, a.currentTime);
+            osc.connect(gain); gain.connect(a.destination);
+            osc.start(); osc.stop(a.currentTime + 0.25);
+        } catch(e) {}
+    }
+    function playPinSound() {
+        try {
+            const a = getAudio();
+            const osc = a.createOscillator(), gain = a.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = 280 + Math.random() * 220;
+            gain.gain.setValueAtTime(0.03, a.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.06);
+            osc.connect(gain); gain.connect(a.destination);
+            osc.start(); osc.stop(a.currentTime + 0.07);
+        } catch(e) {}
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  DIBUJO CANICA TRICOLOR
+    //  FIX #3: curvas Bézier ajustadas para aspecto "trébol"
+    //  FIX #1: colores hex, no var(--x)
+    // ═══════════════════════════════════════════════════
     function drawMarble(b) {
-        ctx.save(); ctx.translate(b.x, b.y);
-        ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath();
-        ctx.arc(b.vx * 0.5, b.vy * 0.5 + 4, b.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.save();
+        ctx.translate(b.x, b.y);
 
-        ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
-        let g = ctx.createRadialGradient(-4, -4, 0, 0, 0, b.radius);
-        g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#80cbc4');
-        ctx.fillStyle = g; ctx.fill();
+        // Sombra dinámica
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath();
+        ctx.arc(b.vx * 0.5, b.vy * 0.5 + 4, b.radius, 0, Math.PI * 2);
+        ctx.fill();
 
+        // Base con gradiente
+        ctx.beginPath();
+        ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+        const g = ctx.createRadialGradient(-4, -4, 0, 0, 0, b.radius);
+        g.addColorStop(0, '#ffffff');
+        g.addColorStop(0.5, '#e0f2f1');
+        g.addColorStop(1, '#80cbc4');
+        ctx.fillStyle = g;
+        ctx.fill();
+
+        // Tricolor Colombia con rotación + clip al círculo
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+        ctx.clip();
         ctx.rotate(b.angle);
-        const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
+        // FIX #3: pétalos más amplios, aspecto trébol colombiano
+        const tricolor = [COLOR_GOLD, COLOR_P2, COLOR_P1];
         tricolor.forEach((col, i) => {
-            ctx.save(); ctx.rotate((Math.PI * 2 / 3) * i);
-            ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, 0);
-            ctx.bezierCurveTo(b.radius * 0.7, -b.radius * 0.5, b.radius * 0.7, b.radius * 0.5, 0, 0);
-            ctx.fill(); ctx.restore();
+            ctx.save();
+            ctx.rotate((Math.PI * 2 / 3) * i);
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(
+                b.radius * 0.7, -b.radius * 0.55,
+                b.radius * 0.7,  b.radius * 0.55,
+                0, 0
+            );
+            ctx.fill();
+            ctx.restore();
         });
         ctx.restore();
-        
-        ctx.save(); ctx.translate(b.x, b.y);
-        let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 2, 0, 0, b.radius);
-        shine.addColorStop(0, 'rgba(255,255,255,0.8)'); shine.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius - 2, 0, Math.PI * 2); ctx.fill();
+
+        // Brillo final
+        const shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 2, 0, 0, b.radius);
+        shine.addColorStop(0, 'rgba(255,255,255,0.8)');
+        shine.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = shine;
+        ctx.beginPath();
+        ctx.arc(0, 0, b.radius - 1, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.restore();
     }
 
+    // ═══════════════════════════════════════════════════
+    //  FÍSICA — SIN GRAVEDAD (corrige el bug principal)
+    //  FIX #2: goalJustScored bloquea cambio de turno
+    //          cuando ya se procesó un gol
+    // ═══════════════════════════════════════════════════
     function update() {
-        if (!gameActive) return;
-        if (isMoving) {
-            const speed = Math.hypot(ball.vx, ball.vy);
-            ball.angle += speed * 0.1;
-            ball.x += ball.vx; ball.y += ball.vy;
-            ball.vx *= PHYSICS.friction; ball.vy *= PHYSICS.friction;
+        if (!gameActive || !isMoving) return;
 
-            if (ball.y < ball.radius || ball.y > H - ball.radius) {
-                ball.vy *= -PHYSICS.wallBounce; ball.y = ball.y < ball.radius ? ball.radius : H-ball.radius;
-            }
-            
-            const goalZone = 70;
-            if (ball.x < 30 && Math.abs(ball.y - H/2) < goalZone) {
-                score[1]++; currentPlayer = 1; resetBallPosition(); return;
-            }
-            if (ball.x > W - 30 && Math.abs(ball.y - H/2) < goalZone) {
-                score[0]++; currentPlayer = 2; resetBallPosition(); return;
-            }
-            
-            if (ball.x < ball.radius || ball.x > W - ball.radius) {
-                ball.vx *= -PHYSICS.wallBounce; ball.x = ball.x < ball.radius ? ball.radius : W-ball.radius;
-            }
+        const speed = Math.hypot(ball.vx, ball.vy);
+        ball.angle += speed * 0.1;
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        // SIN ball.vy += gravity — es la corrección del bug de gravedad
+        ball.vx *= PHYSICS.friction;
+        ball.vy *= PHYSICS.friction;
 
-            pins.forEach(p => {
-                const dx = ball.x - p.x, dy = ball.y - p.y, d = Math.hypot(dx, dy);
-                if (d < ball.radius + PIN_RADIUS) {
-                    const ang = Math.atan2(dy, dx), s = Math.hypot(ball.vx, ball.vy);
-                    ball.vx = Math.cos(ang) * s * PHYSICS.pinBounce;
-                    ball.vy = Math.sin(ang) * s * PHYSICS.pinBounce;
-                    const overlap = (ball.radius + PIN_RADIUS) - d;
-                    ball.x += Math.cos(ang) * overlap; ball.y += Math.sin(ang) * overlap;
-                }
-            });
+        // Paredes top / bottom
+        if (ball.y < ball.radius) {
+            ball.vy = Math.abs(ball.vy) * PHYSICS.wallBounce;
+            ball.y = ball.radius;
+        }
+        if (ball.y > H - ball.radius) {
+            ball.vy = -Math.abs(ball.vy) * PHYSICS.wallBounce;
+            ball.y = H - ball.radius;
+        }
 
-            if (speed < 0.5) { 
-                ball.vx = 0; ball.vy = 0; isMoving = false; 
-                currentPlayer = (currentPlayer === 1) ? 2 : 1; updateUI(); 
+        // ── Detección de gol ──────────────────────────
+        const goalZone = 70;
+        const inLeft  = ball.x < 30  && Math.abs(ball.y - H/2) < goalZone;
+        const inRight = ball.x > W-30 && Math.abs(ball.y - H/2) < goalZone;
+
+        if (inLeft || inRight) {
+            const scorer = inLeft ? 2 : 1; // portería izq → J2 anota; der → J1
+            score[scorer - 1]++;
+            playGoalSound();
+            if (navigator.vibrate) navigator.vibrate([150, 60, 200]);
+            showGoalFlash(scorer);
+            gameLog.push({ scorer, time: 60 - timeLeft, score: [...score] });
+
+            // FIX #2: el que RECIBE el gol saca — y bloqueamos el cambio automático
+            goalJustScored = true;
+            currentPlayer = inLeft ? 1 : 2; // J1 recibe gol izq; J2 recibe gol der
+            updateUI();
+            resetBallPosition();
+            callAiCommentary(scorer);
+            return;
+        }
+
+        // Paredes laterales (fuera de portería)
+        if (ball.x < ball.radius) {
+            ball.vx = Math.abs(ball.vx) * PHYSICS.wallBounce;
+            ball.x = ball.radius;
+        }
+        if (ball.x > W - ball.radius) {
+            ball.vx = -Math.abs(ball.vx) * PHYSICS.wallBounce;
+            ball.x = W - ball.radius;
+        }
+
+        // Colisiones con clavos
+        pins.forEach(p => {
+            const dx = ball.x - p.x, dy = ball.y - p.y;
+            const d = Math.hypot(dx, dy);
+            if (d < ball.radius + PIN_RADIUS && d > 0.001) {
+                const ang = Math.atan2(dy, dx);
+                const spd = Math.hypot(ball.vx, ball.vy);
+                ball.vx = Math.cos(ang) * spd * PHYSICS.pinBounce;
+                ball.vy = Math.sin(ang) * spd * PHYSICS.pinBounce;
+                const overlap = (ball.radius + PIN_RADIUS) - d;
+                ball.x += Math.cos(ang) * (overlap + 0.5);
+                ball.y += Math.sin(ang) * (overlap + 0.5);
+                playPinSound();
+                if (navigator.vibrate) navigator.vibrate(25);
             }
+        });
+
+        // Paró — FIX #2: solo cambia turno si NO fue gol
+        if (speed < 0.5) {
+            ball.vx = 0; ball.vy = 0;
+            isMoving = false;
+            if (!goalJustScored) {
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                updateUI();
+            }
+            goalJustScored = false;
         }
     }
 
+    // ═══════════════════════════════════════════════════
+    //  DRAW — idéntico a index-1.html
+    //  FIX #1: colores hex directos en ctx.fillStyle
+    // ═══════════════════════════════════════════════════
     function draw() {
+        // Fondo
         ctx.fillStyle = '#4e342e'; ctx.fillRect(0, 0, W, H);
+
+        // Textura aleatoria (igual que index-1)
+        ctx.fillStyle = '#5d4037';
+        for (let i = 0; i < 200; i++)
+            ctx.fillRect(Math.random()*W, Math.random()*H, 2, 1);
+
+        // Líneas cancha
         ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 2;
         ctx.strokeRect(15, 15, W-30, H-30);
-        ctx.beginPath(); ctx.moveTo(W/2, 10); ctx.lineTo(W/2, H-10); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(W/2,10); ctx.lineTo(W/2,H-10); ctx.stroke();
         ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
-        
-        ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.textAlign = 'center';
-        ctx.font = 'bold 22px Arial'; ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 35);
-        ctx.font = 'bold 18px Arial';
-        ctx.fillStyle = (currentPlayer === 1 && !isMoving) ? COLORS.p1 : '#aaa';
-        ctx.fillText('JUGADOR 1', W*0.25, 50);
-        ctx.fillStyle = (currentPlayer === 2 && !isMoving) ? COLORS.p2 : '#aaa';
-        ctx.fillText('JUGADOR 2', W*0.75, 50);
+        ctx.beginPath(); ctx.arc(W/2, H/2, 30, 0, Math.PI*2); ctx.stroke();
 
+        // Branding
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 22px "Segoe UI", Arial';
+        ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 35);
+        ctx.font = 'bold 16px "Segoe UI", Arial';
+        ctx.fillText('Seguridad y Salud en el Trabajo', W/2, H - 18);
+
+        // FIX #1: sin var(--p1) — usar constantes JS
+        ctx.font = 'bold 18px "Segoe UI", Arial';
+        ctx.fillStyle = (currentPlayer === 1 && !isMoving) ? COLOR_P1 : '#999';
+        ctx.fillText('JUGADOR 1', W * 0.25, 50);
+        ctx.fillStyle = (currentPlayer === 2 && !isMoving) ? COLOR_P2 : '#999';
+        ctx.fillText('JUGADOR 2', W * 0.75, 50);
+
+        // Porterías con red
         ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
-        ctx.strokeRect(-5, H/2-60, 30, 120); ctx.strokeRect(W-25, H/2-60, 30, 120);
-        
-        pins.forEach(p => {
-            ctx.fillStyle = '#1a1a1a'; ctx.beginPath(); ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2); ctx.fill();
-        });
-
-        if (isDragging && !isMoving && gameActive) {
-            const dx = ball.x - dragCurrent.x, dy = ball.y - dragCurrent.y, force = Math.min(Math.hypot(dx, dy), 100);
-            ctx.beginPath(); ctx.strokeStyle = `rgba(255, 215, 0, ${0.4 + force/150})`;
-            ctx.setLineDash([6, 10]); ctx.lineWidth = 3;
-            ctx.moveTo(ball.x, ball.y); ctx.lineTo(ball.x + dx * 1.8, ball.y + dy * 1.8);
-            ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeRect(-5, H/2-60, 30, 120);
+        ctx.strokeRect(W-25, H/2-60, 30, 120);
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5;
+        for (let i = -50; i <= 50; i += 15) {
+            ctx.beginPath(); ctx.moveTo(0, H/2+i);    ctx.lineTo(25,   H/2+i); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(W-25, H/2+i); ctx.lineTo(W,    H/2+i); ctx.stroke();
         }
 
-        drawMarble(ball); update(); requestAnimationFrame(draw);
+        // Clavos
+        pins.forEach(p => {
+            ctx.fillStyle = '#1a1a1a';
+            ctx.beginPath(); ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#555';
+            ctx.beginPath(); ctx.arc(p.x-1, p.y-1, 2, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Indicador arrastre
+        if (isDragging && !isMoving && gameActive) {
+            const dx = ball.x - dragCurrent.x, dy = ball.y - dragCurrent.y;
+            const force = Math.min(Math.hypot(dx, dy), 100);
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255,215,0,${0.4 + force/150})`;
+            ctx.setLineDash([6, 10]); ctx.lineWidth = 3;
+            ctx.moveTo(ball.x, ball.y);
+            ctx.lineTo(ball.x + dx * 1.8, ball.y + dy * 1.8);
+            ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = `rgba(255,215,0,${0.2 + force/200})`;
+            ctx.beginPath(); ctx.arc(ball.x, ball.y, 18 + force/4, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = COLOR_GOLD;
+            ctx.font = 'bold 14px Arial'; ctx.textAlign = 'left';
+            ctx.fillText(`💪 ${Math.round(force)}%`, ball.x + 22, ball.y - 12);
+        }
+
+        drawMarble(ball);
+        update();
+        requestAnimationFrame(draw);
     }
 
-    window.startGame = function() {
+    // ═══════════════════════════════════════════════════
+    //  LÓGICA DEL JUEGO — idéntica a index-1.html
+    // ═══════════════════════════════════════════════════
+    function startGame() {
         document.getElementById('splash-screen').style.display = 'none';
-        gameActive = true; score = [0, 0]; currentPlayer = 1; timeLeft = 60;
-        resetBallPosition(); startTimer();
-    };
+        score = [0, 0]; currentPlayer = 1; timeLeft = 60;
+        isMoving = false; isDragging = false; gameActive = true;
+        goalJustScored = false; gameLog = [];
+        updateUI(); resetBallPosition(); startTimer();
+        setAiText('¡Arranca el Duelo Entrena! Listo para narrar cada jugada. 🎙️');
+    }
 
     function startTimer() {
-        if(timerInterval) clearInterval(timerInterval);
+        if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             if (!gameActive) return;
-            if (timeLeft > 0) { timeLeft--; document.getElementById('timer').innerText = timeLeft; }
-            else endGame();
+            if (timeLeft > 0) {
+                timeLeft--;
+                const el = document.getElementById('timer');
+                el.innerText = timeLeft;
+                if (timeLeft <= 10) el.style.color = '#ff5252';
+                else el.style.color = '';
+                if (timeLeft <= 0) endGame();
+            }
         }, 1000);
     }
 
     function resetBallPosition() {
-        isMoving = false; isDragging = false; ball.vx = 0; ball.vy = 0;
-        ball.x = currentPlayer === 1 ? 65 : W - 65; ball.y = H/2; updateUI();
+        isMoving = false; isDragging = false;
+        ball.vx = 0; ball.vy = 0; ball.angle = 0;
+        ball.x = currentPlayer === 1 ? 65 : W - 65;
+        ball.y = H / 2;
+        updateUI();
     }
 
     function updateUI() {
         document.getElementById('score1').innerText = score[0];
         document.getElementById('score2').innerText = score[1];
+        document.getElementById('timer').innerText  = timeLeft;
         const t = document.getElementById('turnText');
-        t.innerText = `🎯 Turno: J${currentPlayer}`;
-        t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
+        t.innerText   = `🎯 Turno: J${currentPlayer}`;
+        t.className   = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
     }
 
     function endGame() {
         gameActive = false; clearInterval(timerInterval);
-        const vig = document.getElementById('winnerVignette');
-        vig.querySelector('h2').innerText = score[0] > score[1] ? "🏆 VICTORIA J1" : (score[1] > score[0] ? "🏆 VICTORIA J2" : "EMPATE");
-        vig.style.display = 'flex';
+        const win = score[0] > score[1] ? '🏆 VICTORIA JUGADOR 1 🏆'
+                  : score[1] > score[0] ? '🏆 VICTORIA JUGADOR 2 🏆'
+                  : '🤝 EMPATE 🤝';
+        document.getElementById('winnerText').innerHTML = win;
+        document.getElementById('winnerVignette').style.display = 'flex';
+        generateMatchSummary();
     }
 
-    window.toggleFS = function() {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+    function resetGame() {
+        if (timerInterval) clearInterval(timerInterval);
+        score = [0, 0]; currentPlayer = 1; timeLeft = 60;
+        gameActive = true; isMoving = false; isDragging = false;
+        goalJustScored = false; gameLog = [];
+        resetBallPosition(); updateUI(); startTimer();
+        document.getElementById('winnerVignette').style.display = 'none';
+        setAiText('¡Nueva partida! Comentarista IA de vuelta en acción. 🎙️');
+    }
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement)
+            document.documentElement.requestFullscreen().catch(() => {});
         else document.exitFullscreen();
-    };
+    }
 
-    canvas.addEventListener('mousedown', (e) => {
-        if(isMoving || !gameActive) return;
-        const c = getCoords(e);
-        if(Math.hypot(c.x - ball.x, c.y - ball.y) < 55) { isDragging = true; dragCurrent = c; }
-    });
-    window.addEventListener('mousemove', (e) => { if(isDragging) dragCurrent = getCoords(e); });
-    window.addEventListener('mouseup', () => {
-        if(!isDragging) return;
+    // ═══════════════════════════════════════════════════
+    //  FLASH GOL
+    // ═══════════════════════════════════════════════════
+    function showGoalFlash(scorer) {
+        const el = document.getElementById('goal-flash');
+        el.textContent = `⚽ ¡GOL J${scorer}!`;
+        el.style.color      = scorer === 1 ? '#ef9a9a' : '#90caf9';
+        el.style.textShadow = `0 0 30px ${scorer === 1 ? COLOR_P1 : COLOR_P2}`;
+        el.className = 'show';
+        setTimeout(() => { el.className = ''; el.textContent = ''; }, 1200);
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  EVENTOS — idénticos a index-1.html
+    // ═══════════════════════════════════════════════════
+    function onTouchStart(e) {
+        e.preventDefault();
+        if (isMoving || !gameActive) return;
+        const c = getCoordsFromEvent(e);
+        if (Math.hypot(c.x - ball.x, c.y - ball.y) < 55) { isDragging = true; dragCurrent = c; }
+    }
+    function onTouchMove(e) {
+        if (!isDragging || isMoving || !gameActive) return;
+        e.preventDefault(); dragCurrent = getCoordsFromEvent(e);
+    }
+    function onTouchEnd(e) {
+        e.preventDefault();
+        if (!isDragging || isMoving || !gameActive) { isDragging = false; return; }
         const dx = ball.x - dragCurrent.x, dy = ball.y - dragCurrent.y;
-        if(Math.hypot(dx, dy) > 8) { ball.vx = dx * PHYSICS.powerMult; ball.vy = dy * PHYSICS.powerMult; isMoving = true; }
+        if (Math.hypot(dx, dy) > 8) {
+            ball.vx = dx * PHYSICS.powerMult;
+            ball.vy = dy * PHYSICS.powerMult;
+            isMoving = true;
+        }
         isDragging = false;
-    });
-
-    canvas.addEventListener('touchstart', (e) => {
-        if(isMoving || !gameActive) return;
-        const c = getCoords(e);
-        if(Math.hypot(c.x - ball.x, c.y - ball.y) < 55) { isDragging = true; dragCurrent = c; }
-    }, {passive: false});
-    window.addEventListener('touchmove', (e) => { if(isDragging) { e.preventDefault(); dragCurrent = getCoords(e); } }, {passive: false});
-    window.addEventListener('touchend', () => {
-        if(!isDragging) return;
+    }
+    function onMouseDown(e) {
+        e.preventDefault();
+        if (isMoving || !gameActive) return;
+        const c = getCoordsFromEvent(e);
+        if (Math.hypot(c.x - ball.x, c.y - ball.y) < 55) { isDragging = true; dragCurrent = c; }
+    }
+    function onMouseMove(e) {
+        if (!isDragging || isMoving || !gameActive) return;
+        e.preventDefault(); dragCurrent = getCoordsFromEvent(e);
+    }
+    function onMouseUp(e) {
+        if (!isDragging || isMoving || !gameActive) { isDragging = false; return; }
         const dx = ball.x - dragCurrent.x, dy = ball.y - dragCurrent.y;
-        if(Math.hypot(dx, dy) > 8) { ball.vx = dx * PHYSICS.powerMult; ball.vy = dy * PHYSICS.powerMult; isMoving = true; }
+        if (Math.hypot(dx, dy) > 8) {
+            ball.vx = dx * PHYSICS.powerMult;
+            ball.vy = dy * PHYSICS.powerMult;
+            isMoving = true;
+        }
         isDragging = false;
-    });
+    }
 
-    initField(); updateUI(); draw();
+    function setupEvents() {
+        window.addEventListener('touchstart',  onTouchStart, { passive: false });
+        window.addEventListener('touchmove',   onTouchMove,  { passive: false });
+        window.addEventListener('touchend',    onTouchEnd);
+        window.addEventListener('touchcancel', onTouchEnd);
+        canvas.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup',   onMouseUp);
+        canvas.addEventListener('dragstart',   e => e.preventDefault());
+        canvas.addEventListener('selectstart', e => e.preventDefault());
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  CLAUDE AI — COMENTARISTA EN VIVO
+    // ═══════════════════════════════════════════════════
+    let aiTyping = false;
+    function setAiText(text) {
+        const el = document.getElementById('ai-comment');
+        aiTyping = true; el.innerHTML = '';
+        const cur = document.createElement('span'); cur.className = 'cur'; el.appendChild(cur);
+        let i = 0;
+        const iv = setInterval(() => {
+            if (i >= text.length) { clearInterval(iv); cur.remove(); aiTyping = false; return; }
+            el.insertBefore(document.createTextNode(text[i++]), cur);
+        }, 22);
+    }
+
+    async function callAiCommentary(scorer) {
+        setAiText('🎙️ Narrando...');
+        const fallbacks = [
+            `🎙️ ¡GOLAZOOOO! ¡Jugador ${scorer} no perdona!`,
+            `🎙️ ¡Pepazoooo de J${scorer}! ¡La tricolor vuela!`,
+            `🎙️ ¡Imparable Jugador ${scorer}! El tablero retumba.`,
+            `🎙️ ¡J${scorer} anota! El duelo se enciende en Entrena.`,
+        ];
+        try {
+            const prompt = `Eres el comentarista del "Duelo Entrena" de Entrena Consulting SAS, empresa colombiana de SST.
+Marcador: J1 ${score[0]} - J2 ${score[1]}. Anotó Jugador ${scorer} en el minuto ${60 - timeLeft}.
+Escribe UNA exclamación emocionante, estilo comentarista latinoamericano, máximo 16 palabras. Solo el texto, sin comillas ni asteriscos.`;
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514', max_tokens: 60,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+            const data = await res.json();
+            const txt = data.content?.[0]?.text?.trim();
+            setAiText('🎙️ ' + (txt || fallbacks[0].slice(3)));
+        } catch { setAiText(fallbacks[Math.floor(Math.random() * fallbacks.length)]); }
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  CLAUDE AI — RESUMEN POST-PARTIDO
+    // ═══════════════════════════════════════════════════
+    async function generateMatchSummary() {
+        const el = document.getElementById('ai-summary');
+        const golesDesc = gameLog.length
+            ? gameLog.map(g => `Min ${g.time}: J${g.scorer} anotó (${g.score[0]}-${g.score[1]})`).join('. ')
+            : 'Partido sin goles.';
+        const ganador = score[0] > score[1] ? 'Jugador 1' : score[1] > score[0] ? 'Jugador 2' : 'empate';
+        const fallback = ganador === 'empate'
+            ? `Empate ${score[0]}-${score[1]}. Duelo equilibrado en Entrena Consulting SAS.`
+            : `${ganador} dominó con ${Math.max(...score)} goles. Gran duelo en Entrena Consulting SAS.`;
+        try {
+            const prompt = `Eres el analista post-partido del torneo "Duelo Entrena" de Entrena Consulting SAS (empresa colombiana de SST).
+Resultado: J1 ${score[0]} - J2 ${score[1]}. Ganador: ${ganador}. Cronología: ${golesDesc}.
+Escribe 2-3 oraciones de análisis, tono deportivo profesional, menciona Entrena Consulting SAS. Sin asteriscos ni markdown.`;
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514', max_tokens: 130,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+            const data = await res.json();
+            const txt = data.content?.[0]?.text?.trim();
+            el.innerText = '⚡ ' + (txt || fallback);
+        } catch { el.innerText = '⚡ ' + fallback; }
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  INIT
+    // ═══════════════════════════════════════════════════
+    function init() {
+        initField();
+        setupEvents();
+        draw();
+        document.getElementById('startBtn').onclick       = startGame;
+        document.getElementById('resetGameBtn').onclick   = resetGame;
+        document.getElementById('fullscreenBtn').onclick  = toggleFullscreen;
+        document.getElementById('playAgainBtn').onclick   = () => location.reload();
+        document.getElementById('ignoreRotateBtn').onclick = () => {
+            document.getElementById('rotate-overlay').style.display = 'none';
+        };
+        updateUI();
+    }
+
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', init);
+    else init();
+
 })();
 </script>
 </body>
