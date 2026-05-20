@@ -16,9 +16,10 @@
             position: fixed;
             width: 100%;
             height: 100%;
-            touch-action: none; /* IMPORTANTE: previene scroll/zoom durante el juego */
+            touch-action: none;
         }
 
+        /* === PANTALLA DE SPLASH === */
         #splash-screen {
             position: fixed;
             top: 0;
@@ -42,11 +43,7 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
-        #splash-screen p {
-            font-size: clamp(14px, 4vw, 18px);
-            margin-bottom: 30px;
-        }
-
+        /* === OVERLAY DE ROTACIÓN CORREGIDO === */
         #rotate-overlay {
             display: none;
             position: fixed;
@@ -65,18 +62,27 @@
         
         #rotate-overlay button {
             margin-top: 30px;
-            padding: 12px 30px;
+            padding: 15px 40px;  /* Botón más grande para móvil */
             background: var(--gold);
             border: none;
             border-radius: 50px;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 20px;     /* Texto más grande */
             cursor: pointer;
+            min-width: 200px;     /* Ancho mínimo */
         }
 
+        /* === CORRECCIÓN IMPORTANTE: NO BLOQUEAR LOS CLICS === */
         @media (orientation: portrait) {
-            #rotate-overlay { display: flex; }
-            .game-wrapper { filter: blur(4px); pointer-events: none; }
+            #rotate-overlay { 
+                display: flex; 
+                z-index: 3000;
+            }
+            /* ELIMINADO: pointer-events: none - ahora se puede hacer clic */
+            .game-wrapper { 
+                filter: blur(4px); 
+                /* pointer-events: none;  ← LÍNEA ELIMINADA */
+            }
         }
         
         @media (orientation: landscape) {
@@ -84,6 +90,7 @@
             .game-wrapper { filter: none !important; pointer-events: auto !important; }
         }
 
+        /* === CONTENEDOR DEL JUEGO === */
         .game-wrapper {
             position: relative;
             width: 100vw;
@@ -108,6 +115,7 @@
             border: 3px solid #5d4037;
         }
 
+        /* === UI SUPERIOR CON BOTONES MÁS GRANDES === */
         .ui-top {
             display: flex;
             justify-content: space-between;
@@ -122,18 +130,18 @@
 
         .stat-box {
             background: #2d1b18;
-            padding: 10px 20px;
+            padding: 12px 20px;  /* Padding más grande */
             border-radius: 40px;
             font-weight: bold;
             border: 1px solid #5d4037;
-            font-size: clamp(14px, 3vh, 20px);
+            font-size: clamp(16px, 4vh, 22px);  /* Texto más grande */
             text-align: center;
             white-space: nowrap;
         }
 
         .turn {
             transition: 0.3s;
-            min-width: 130px;
+            min-width: 150px;  /* Más ancho */
         }
         
         .p1-active { background: var(--p1); box-shadow: 0 0 15px var(--p1); }
@@ -162,29 +170,38 @@
             object-fit: contain;
         }
 
+        /* === BOTONES DE CONTROL MÁS GRANDES === */
         .control-bar {
             display: flex;
-            gap: 15px;
-            margin-top: 10px;
+            gap: 20px;           /* Más espacio entre botones */
+            margin-top: 12px;
             justify-content: center;
             flex-wrap: wrap;
             flex-shrink: 0;
         }
 
         .btn {
-            padding: 8px 25px;
-            font-size: 14px;
+            padding: 12px 30px;   /* Botones más grandes */
+            font-size: 16px;      /* Texto más grande */
             font-weight: bold;
             cursor: pointer;
-            border-radius: 40px;
+            border-radius: 50px;   /* Más redondeados */
             border: none;
             background: var(--gold);
             color: #000;
             transition: transform 0.1s;
             font-family: inherit;
+            min-width: 140px;      /* Ancho mínimo */
         }
         
-        .btn:active { transform: scale(0.95); }
+        .btn:active { transform: scale(0.96); }
+
+        /* === BOTÓN DEL SPLASH MÁS GRANDE === */
+        #startBtn {
+            font-size: 22px !important;
+            padding: 15px 45px !important;
+            min-width: 220px;
+        }
 
         #winnerVignette {
             display: none;
@@ -203,28 +220,64 @@
             text-align: center;
         }
         
+        #winnerVignette .btn {
+            font-size: 18px;
+            padding: 12px 35px;
+        }
+        
+        /* === RESPONSIVE PARA PANTALLAS PEQUEÑAS === */
         @media (max-width: 768px) {
-            .stat-box { padding: 6px 12px; font-size: 12px; }
-            .turn { min-width: 100px; }
-            .btn { padding: 6px 15px; font-size: 12px; }
+            .stat-box { 
+                padding: 8px 12px; 
+                font-size: 14px; 
+            }
+            .turn { min-width: 110px; }
+            .btn { 
+                padding: 10px 20px; 
+                font-size: 14px;
+                min-width: 120px;
+            }
+            .control-bar { gap: 12px; }
+        }
+        
+        @media (max-height: 450px) {
+            .stat-box { padding: 6px 10px; font-size: 12px; }
+            .turn { min-width: 95px; }
+            .btn { padding: 8px 16px; font-size: 12px; min-width: 100px; }
+            .control-bar { margin-top: 6px; gap: 8px; }
+        }
+        
+        /* Mejora para dedos en móvil */
+        @media (pointer: coarse) {
+            .btn {
+                padding: 14px 25px;
+                font-size: 16px;
+            }
+            .stat-box {
+                padding: 10px 16px;
+            }
         }
     </style>
 </head>
 <body>
 
+<!-- Overlay de rotación CORREGIDO (AHORA SE PUEDE HACER CLIC) -->
 <div id="rotate-overlay">
-    <div style="font-size: 70px;">🔄</div>
-    <p style="margin: 20px; font-size: 18px;">GIRA tu dispositivo a horizontal para mejor experiencia</p>
-    <button id="closeRotateBtn">CONTINUAR ASÍ</button>
+    <div style="font-size: 80px;">🔄</div>
+    <p style="margin: 20px; font-size: 22px; font-weight: bold;">GIRA tu dispositivo a horizontal</p>
+    <p style="margin-bottom: 20px; font-size: 16px; opacity: 0.8;">para mejor experiencia</p>
+    <button id="closeRotateBtn">CONTINUAR ASÍ ▶</button>
 </div>
 
+<!-- Pantalla de inicio -->
 <div id="splash-screen">
-    <div style="font-size: 14px; letter-spacing: 3px;">BIENVENIDOS A</div>
+    <div style="font-size: 16px; letter-spacing: 4px;">BIENVENIDOS A</div>
     <h1>ENTRENA CONSULTING SAS</h1>
-    <p>Expertos en Seguridad y Salud en el Trabajo</p>
-    <button class="btn" id="startBtn" style="font-size: 18px; padding: 12px 35px;">▶ INICIAR DUELO</button>
+    <p style="font-size: 18px; margin-bottom: 30px;">Expertos en Seguridad y Salud en el Trabajo</p>
+    <button class="btn" id="startBtn">▶ INICIAR DUELO</button>
 </div>
 
+<!-- Contenedor del juego -->
 <div class="game-wrapper">
     <div class="game-container">
         <div class="ui-top">
@@ -243,8 +296,8 @@
         </div>
 
         <div id="winnerVignette">
-            <h2 id="winnerText"></h2>
-            <p style="margin-bottom: 25px;">Entrena Consulting SAS - SST</p>
+            <h2 id="winnerText" style="font-size: clamp(28px, 8vh, 56px);"></h2>
+            <p style="margin-bottom: 25px; font-size: 18px;">Entrena Consulting SAS - SST</p>
             <button class="btn" onclick="location.reload()">🎮 JUGAR DE NUEVO</button>
         </div>
     </div>
@@ -265,20 +318,14 @@
         let gameActive = false;
         let timerInterval = null;
         
-        // Variables de arrastre - GLOBALES para mantener el drag aunque el dedo salga del canvas
         let isDragging = false;
         let dragStart = { x: 0, y: 0 };
         let dragCurrent = { x: 0, y: 0 };
-        let isTouchDevice = false;
 
         let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
         const pins = [];
         const PIN_RADIUS = 8;
 
-        // Detectar si es dispositivo táctil
-        isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
-        // ============ FUNCIÓN CORREGIDA: obtener coordenadas relativas al canvas ============
         function getCanvasCoords(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = W / rect.width;
@@ -487,7 +534,6 @@
                 ctx.fill();
             });
 
-            // Indicador de arrastre - FUNCIONA INCLUSO FUERA DEL CANVAS
             if (isDragging && !isMoving && gameActive) {
                 const dx = ball.x - dragCurrent.x;
                 const dy = ball.y - dragCurrent.y;
@@ -532,12 +578,10 @@
             resetBallPosition();
             startTimer();
             
-            // Pantalla completa automática
             setTimeout(() => {
                 const elem = document.documentElement;
                 if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
                 else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
             }, 100);
         }
 
@@ -597,7 +641,7 @@
             document.getElementById('winnerVignette').style.display = 'none';
         }
 
-        // ============ EVENTOS TÁCTILES CORREGIDOS - GLOBALES ============
+        // ============ EVENTOS TÁCTILES ============
         function onTouchStart(e) {
             e.preventDefault();
             if(isMoving || !gameActive) return;
@@ -639,7 +683,6 @@
             isDragging = false;
         }
         
-        // ============ EVENTOS DE RATÓN ============
         function onMouseDown(e) {
             e.preventDefault();
             if(isMoving || !gameActive) return;
@@ -676,20 +719,16 @@
             isDragging = false;
         }
 
-        // ============ CONFIGURACIÓN DE EVENTOS ============
         function setupEvents() {
-            // Touch events - IMPORTANTE: usar window para capturar fuera del canvas
             window.addEventListener('touchstart', onTouchStart, { passive: false });
             window.addEventListener('touchmove', onTouchMove, { passive: false });
             window.addEventListener('touchend', onTouchEnd);
             window.addEventListener('touchcancel', onTouchEnd);
             
-            // Mouse events
             canvas.addEventListener('mousedown', onMouseDown);
             window.addEventListener('mousemove', onMouseMove);
             window.addEventListener('mouseup', onMouseUp);
             
-            // Prevenir comportamiento por defecto en canvas
             canvas.addEventListener('dragstart', (e) => e.preventDefault());
             canvas.addEventListener('selectstart', (e) => e.preventDefault());
         }
