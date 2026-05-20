@@ -19,269 +19,91 @@
             touch-action: none;
         }
 
-        /* === PANTALLA DE SPLASH === */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, #1b5e20, #0a0a0a);
-            color: white;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+        /* === PANTALLAS DE INTERFAZ === */
+        #splash-screen, #winnerVignette, #rotate-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; z-index: 2000;
         }
 
-        #splash-screen h1 {
-            color: var(--gold);
-            margin: 20px 0;
-            font-size: clamp(24px, 6vw, 42px);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
+        #splash-screen { background: radial-gradient(circle, #1b5e20, #0a0a0a); color: white; }
+        #winnerVignette { background: rgba(0,0,0,0.95); color: white; display: none; }
+        #rotate-overlay { background: rgba(0,0,0,0.9); color: white; display: none; z-index: 3000; }
 
-        /* === OVERLAY DE ROTACIÓN CORREGIDO === */
-        #rotate-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 3000;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
-        }
+        h1 { color: var(--gold); margin: 20px 0; font-size: clamp(24px, 6vw, 42px); }
         
-        #rotate-overlay button {
-            margin-top: 30px;
-            padding: 15px 40px;  /* Botón más grande para móvil */
-            background: var(--gold);
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 20px;     /* Texto más grande */
-            cursor: pointer;
-            min-width: 200px;     /* Ancho mínimo */
-        }
-
-        /* === CORRECCIÓN IMPORTANTE: NO BLOQUEAR LOS CLICS === */
-        @media (orientation: portrait) {
-            #rotate-overlay { 
-                display: flex; 
-                z-index: 3000;
-            }
-            /* ELIMINADO: pointer-events: none - ahora se puede hacer clic */
-            .game-wrapper { 
-                filter: blur(4px); 
-                /* pointer-events: none;  ← LÍNEA ELIMINADA */
-            }
-        }
-        
-        @media (orientation: landscape) {
-            #rotate-overlay { display: none !important; }
-            .game-wrapper { filter: none !important; pointer-events: auto !important; }
-        }
-
-        /* === CONTENEDOR DEL JUEGO === */
+        /* === CONTENEDOR PRINCIPAL RESPONSIVO === */
         .game-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #0a0a0a;
+            width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center;
         }
 
         .game-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            width: 98%;
-            height: 98%;
-            max-width: 1400px;
-            background: #3e2723;
-            padding: 12px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            border: 3px solid #5d4037;
+            display: flex; flex-direction: column;
+            width: 98%; height: 98%; max-width: 1200px;
+            background: #3e2723; padding: 10px; border-radius: 15px;
+            border: 3px solid #5d4037; position: relative;
         }
 
-        /* === UI SUPERIOR CON BOTONES MÁS GRANDES === */
         .ui-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            color: #fff;
-            width: 100%;
-            flex-shrink: 0;
-            gap: 15px;
-            padding: 0 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; color: #fff; width: 100%; flex-shrink: 0; gap: 10px;
         }
 
         .stat-box {
-            background: #2d1b18;
-            padding: 12px 20px;  /* Padding más grande */
-            border-radius: 40px;
-            font-weight: bold;
-            border: 1px solid #5d4037;
-            font-size: clamp(16px, 4vh, 22px);  /* Texto más grande */
-            text-align: center;
-            white-space: nowrap;
+            background: #2d1b18; padding: 8px 15px; border-radius: 30px;
+            font-weight: bold; border: 1px solid #5d4037;
+            font-size: clamp(14px, 3vh, 20px); min-width: 80px; text-align: center;
         }
 
-        .turn {
-            transition: 0.3s;
-            min-width: 150px;  /* Más ancho */
-        }
-        
+        .turn { transition: 0.3s; min-width: 120px; }
         .p1-active { background: var(--p1); box-shadow: 0 0 15px var(--p1); }
         .p2-active { background: var(--p2); box-shadow: 0 0 15px var(--p2); }
 
+        /* === ÁREA DE JUEGO === */
         .canvas-wrapper {
-            flex: 1;
-            position: relative;
-            min-height: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #2a1a15;
-            border-radius: 15px;
-            overflow: hidden;
+            flex: 1; position: relative; display: flex; justify-content: center;
+            align-items: center; background: #2a1a15; border-radius: 10px; overflow: hidden;
         }
 
         canvas {
-            display: block;
-            background: #bcaaa4;
-            border-radius: 10px;
-            touch-action: none;
-            cursor: crosshair;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            background: #bcaaa4; border-radius: 5px; cursor: crosshair;
         }
 
-        /* === BOTONES DE CONTROL MÁS GRANDES === */
         .control-bar {
-            display: flex;
-            gap: 20px;           /* Más espacio entre botones */
-            margin-top: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            flex-shrink: 0;
+            display: flex; gap: 15px; margin-top: 10px; justify-content: center; flex-shrink: 0;
         }
 
         .btn {
-            padding: 12px 30px;   /* Botones más grandes */
-            font-size: 16px;      /* Texto más grande */
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 50px;   /* Más redondeados */
-            border: none;
-            background: var(--gold);
-            color: #000;
-            transition: transform 0.1s;
-            font-family: inherit;
-            min-width: 140px;      /* Ancho mínimo */
-        }
-        
-        .btn:active { transform: scale(0.96); }
-
-        /* === BOTÓN DEL SPLASH MÁS GRANDE === */
-        #startBtn {
-            font-size: 22px !important;
-            padding: 15px 45px !important;
-            min-width: 220px;
+            padding: 10px 25px; font-size: 14px; font-weight: bold; cursor: pointer;
+            border-radius: 30px; border: none; background: var(--gold); color: #000;
+            min-width: 120px;
         }
 
-        #winnerVignette {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.97);
-            z-index: 100;
-            border-radius: 20px;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
-        }
-        
-        #winnerVignette .btn {
-            font-size: 18px;
-            padding: 12px 35px;
-        }
-        
-        /* === RESPONSIVE PARA PANTALLAS PEQUEÑAS === */
-        @media (max-width: 768px) {
-            .stat-box { 
-                padding: 8px 12px; 
-                font-size: 14px; 
-            }
-            .turn { min-width: 110px; }
-            .btn { 
-                padding: 10px 20px; 
-                font-size: 14px;
-                min-width: 120px;
-            }
-            .control-bar { gap: 12px; }
-        }
-        
-        @media (max-height: 450px) {
-            .stat-box { padding: 6px 10px; font-size: 12px; }
-            .turn { min-width: 95px; }
-            .btn { padding: 8px 16px; font-size: 12px; min-width: 100px; }
-            .control-bar { margin-top: 6px; gap: 8px; }
-        }
-        
-        /* Mejora para dedos en móvil */
-        @media (pointer: coarse) {
-            .btn {
-                padding: 14px 25px;
-                font-size: 16px;
-            }
-            .stat-box {
-                padding: 10px 16px;
-            }
+        @media (orientation: portrait) {
+            #rotate-overlay { display: flex; }
         }
     </style>
 </head>
 <body>
 
-<!-- Overlay de rotación CORREGIDO (AHORA SE PUEDE HACER CLIC) -->
-<div id="rotate-overlay">
-    <div style="font-size: 80px;">🔄</div>
-    <p style="margin: 20px; font-size: 22px; font-weight: bold;">GIRA tu dispositivo a horizontal</p>
-    <p style="margin-bottom: 20px; font-size: 16px; opacity: 0.8;">para mejor experiencia</p>
-    <button id="closeRotateBtn">CONTINUAR ASÍ ▶</button>
+<div id="rotate-overlay" onclick="this.style.display='none'">
+    <div style="font-size: 60px;">🔄</div>
+    <p style="margin: 20px; font-size: 20px;">GIRA A HORIZONTAL</p>
+    <button class="btn">IGNORAR</button>
 </div>
 
-<!-- Pantalla de inicio -->
 <div id="splash-screen">
-    <div style="font-size: 16px; letter-spacing: 4px;">BIENVENIDOS A</div>
+    <div style="font-size: 14px; letter-spacing: 3px;">BIENVENIDOS A</div>
     <h1>ENTRENA CONSULTING SAS</h1>
-    <p style="font-size: 18px; margin-bottom: 30px;">Expertos en Seguridad y Salud en el Trabajo</p>
-    <button class="btn" id="startBtn">▶ INICIAR DUELO</button>
+    <p style="margin-bottom: 30px;">Expertos en Seguridad y Salud en el Trabajo</p>
+    <button class="btn" onclick="startGame()" style="font-size: 20px; padding: 15px 40px;">INICIAR DUELO</button>
 </div>
 
-<!-- Contenedor del juego -->
 <div class="game-wrapper">
     <div class="game-container">
         <div class="ui-top">
-            <div id="turnText" class="stat-box turn p1-active">🎯 Turno: J1</div>
+            <div id="turnText" class="stat-box turn p1-active">Turno: J1</div>
             <div class="stat-box" style="color:var(--gold);">⚽ <span id="score1">0</span> - <span id="score2">0</span></div>
             <div class="stat-box">⏱️ <span id="timer">60</span>s</div>
         </div>
@@ -291,482 +113,216 @@
         </div>
 
         <div class="control-bar">
-            <button class="btn" id="fullscreenBtn">⛶ Pantalla completa</button>
-            <button class="btn" id="resetGameBtn">🔄 Reiniciar</button>
+            <button class="btn" onclick="toggleFS()">PANTALLA COMPLETA</button>
+            <button class="btn" onclick="location.reload()">REINICIAR</button>
         </div>
 
         <div id="winnerVignette">
-            <h2 id="winnerText" style="font-size: clamp(28px, 8vh, 56px);"></h2>
-            <p style="margin-bottom: 25px; font-size: 18px;">Entrena Consulting SAS - SST</p>
-            <button class="btn" onclick="location.reload()">🎮 JUGAR DE NUEVO</button>
+            <h2 id="winnerText" style="font-size: 40px; color: var(--gold); margin-bottom: 15px;"></h2>
+            <p style="margin-bottom: 25px;">Entrena Consulting SAS - SST</p>
+            <button class="btn" onclick="location.reload()">JUGAR DE NUEVO</button>
         </div>
     </div>
 </div>
 
 <script>
-    (function() {
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const W = 800, H = 520;
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = 800, H = 520;
 
-        const PHYSICS = { friction: 0.988, wallBounce: 0.65, pinBounce: 0.82, powerMult: 0.14 };
-        
-        let score = [0, 0];
-        let currentPlayer = 1;
-        let timeLeft = 60;
-        let isMoving = false;
-        let gameActive = false;
-        let timerInterval = null;
-        
-        let isDragging = false;
-        let dragStart = { x: 0, y: 0 };
-        let dragCurrent = { x: 0, y: 0 };
+    const PHYSICS = { friction: 0.988, wallBounce: 0.6, pinBounce: 0.82, powerMult: 0.16 };
+    let score = [0, 0], currentPlayer = 1, timeLeft = 60, isMoving = false, isDragging = false;
+    let gameActive = false, timerInterval, dragCurrent = {x:0, y:0};
 
-        let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
-        const pins = [];
-        const PIN_RADIUS = 8;
+    let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
+    const pins = [];
+    const PIN_RADIUS = 8;
 
-        function getCanvasCoords(clientX, clientY) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = W / rect.width;
-            const scaleY = H / rect.height;
-            
-            let x = (clientX - rect.left) * scaleX;
-            let y = (clientY - rect.top) * scaleY;
-            
-            return { 
-                x: Math.min(Math.max(0, x), W), 
-                y: Math.min(Math.max(0, y), H) 
-            };
-        }
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: (clientX - rect.left) * (W / rect.width),
+            y: (clientY - rect.top) * (H / rect.height)
+        };
+    }
 
-        function initField() {
-            pins.length = 0;
-            const createFormation = (dir) => {
-                const baseX = dir === 1 ? W * 0.1 : W * 0.9;
-                const s = dir === 1 ? 75 : -75;
-                pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); 
-                [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s, y: H * p }));
-                [0.3, 0.5, 0.7].forEach(p => pins.push({ x: baseX + s * 2.5, y: H * p }));
-                pins.push({ x: baseX + s * 3.8, y: H/2 });
-                [0.38, 0.62].forEach(p => pins.push({ x: baseX + s * 5.2, y: H * p }));
-            };
-            createFormation(1); 
-            createFormation(-1);
-        }
+    function initField() {
+        const createFormation = (dir) => {
+            const baseX = dir === 1 ? W * 0.1 : W * 0.9;
+            const s = dir === 1 ? 75 : -75;
+            pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); 
+            [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s, y: H*p }));
+            [0.3, 0.5, 0.7].forEach(p => pins.push({ x: baseX + s*2.5, y: H*p }));
+            pins.push({ x: baseX + s*3.8, y: H/2 });
+            [0.38, 0.62].forEach(p => pins.push({ x: baseX + s*5.2, y: H*p }));
+        };
+        createFormation(1); createFormation(-1);
+    }
 
-        function drawMarble(b) {
-            ctx.save();
-            ctx.translate(b.x, b.y);
-            
-            ctx.fillStyle = 'rgba(0,0,0,0.25)';
-            ctx.beginPath();
-            ctx.arc(b.vx * 0.5, b.vy * 0.5 + 4, b.radius, 0, Math.PI * 2);
-            ctx.fill();
+    function drawMarble(b) {
+        ctx.save(); ctx.translate(b.x, b.y);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath();
+        ctx.arc(b.vx, b.vy + 5, b.radius, 0, Math.PI*2); ctx.fill();
 
-            ctx.beginPath();
-            ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
-            let g = ctx.createRadialGradient(-4, -4, 0, 0, 0, b.radius);
-            g.addColorStop(0, '#ffffff');
-            g.addColorStop(0.5, '#e0f2f1');
-            g.addColorStop(1, '#80cbc4');
-            ctx.fillStyle = g;
-            ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2);
+        let g = ctx.createRadialGradient(-3, -3, 0, 0, 0, b.radius);
+        g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#b2dfdb');
+        ctx.fillStyle = g; ctx.fill();
 
-            ctx.rotate(b.angle);
-            const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
-            tricolor.forEach((col, i) => {
-                ctx.save();
-                ctx.rotate((Math.PI * 2 / 3) * i);
-                ctx.fillStyle = col;
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.quadraticCurveTo(b.radius * 0.6, -b.radius * 0.4, b.radius * 0.9, 0);
-                ctx.quadraticCurveTo(b.radius * 0.6, b.radius * 0.4, 0, 0);
-                ctx.fill();
-                ctx.restore();
-            });
+        ctx.rotate(b.angle);
+        const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
+        tricolor.forEach((col, i) => {
+            ctx.save(); ctx.rotate((Math.PI * 2 / 3) * i);
+            ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(b.radius * 0.8, -b.radius * 0.5, b.radius * 0.8, b.radius * 0.5, 0, 0);
+            ctx.fill(); ctx.restore();
+        });
 
-            ctx.restore();
-            
-            ctx.save();
-            ctx.translate(b.x, b.y);
-            let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 2, 0, 0, b.radius);
-            shine.addColorStop(0, 'rgba(255,255,255,0.8)');
-            shine.addColorStop(1, 'rgba(255,255,255,0)');
-            ctx.fillStyle = shine;
-            ctx.beginPath();
-            ctx.arc(0, 0, b.radius - 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
+        ctx.restore(); ctx.save(); ctx.translate(b.x, b.y);
+        let shine = ctx.createRadialGradient(-b.radius/2.5, -b.radius/2.5, 1, 0, 0, b.radius);
+        shine.addColorStop(0, 'rgba(255,255,255,0.8)'); shine.addColorStop(1, 'rgba(0,0,0,0.05)');
+        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
 
-        function update() {
-            if (!gameActive) return;
-            
-            if (isMoving) {
-                const speed = Math.hypot(ball.vx, ball.vy);
-                ball.angle += speed * 0.1;
-                ball.x += ball.vx;
-                ball.y += ball.vy;
-                ball.vx *= PHYSICS.friction;
-                ball.vy *= PHYSICS.friction;
+    function update() {
+        if (!gameActive) return;
+        if (isMoving) {
+            const speed = Math.hypot(ball.vx, ball.vy);
+            ball.angle += speed * 0.08;
+            ball.x += ball.vx; ball.y += ball.vy;
+            ball.vx *= PHYSICS.friction; ball.vy *= PHYSICS.friction;
 
-                if (ball.y < ball.radius) {
-                    ball.vy = Math.abs(ball.vy) * PHYSICS.wallBounce;
-                    ball.y = ball.radius;
-                }
-                if (ball.y > H - ball.radius) {
-                    ball.vy = -Math.abs(ball.vy) * PHYSICS.wallBounce;
-                    ball.y = H - ball.radius;
-                }
-                
-                const goalZone = 70;
-                const isGoalLeft = (ball.x < 30 && Math.abs(ball.y - H/2) < goalZone);
-                const isGoalRight = (ball.x > W - 30 && Math.abs(ball.y - H/2) < goalZone);
-                
-                if (isGoalLeft) {
-                    score[1]++;
-                    currentPlayer = 1;
-                    updateUI();
-                    resetBallPosition();
-                    return;
-                }
-                if (isGoalRight) {
-                    score[0]++;
-                    currentPlayer = 2;
-                    updateUI();
-                    resetBallPosition();
-                    return;
-                }
-                
-                if (ball.x < ball.radius) {
-                    ball.vx = Math.abs(ball.vx) * PHYSICS.wallBounce;
-                    ball.x = ball.radius;
-                }
-                if (ball.x > W - ball.radius) {
-                    ball.vx = -Math.abs(ball.vx) * PHYSICS.wallBounce;
-                    ball.x = W - ball.radius;
-                }
-
-                pins.forEach(p => {
-                    const dx = ball.x - p.x;
-                    const dy = ball.y - p.y;
-                    const d = Math.hypot(dx, dy);
-                    if (d < ball.radius + PIN_RADIUS) {
-                        const ang = Math.atan2(dy, dx);
-                        const currentSpeed = Math.hypot(ball.vx, ball.vy);
-                        ball.vx = Math.cos(ang) * currentSpeed * PHYSICS.pinBounce;
-                        ball.vy = Math.sin(ang) * currentSpeed * PHYSICS.pinBounce;
-                        const overlap = (ball.radius + PIN_RADIUS) - d;
-                        ball.x += Math.cos(ang) * overlap;
-                        ball.y += Math.sin(ang) * overlap;
-                    }
-                });
-
-                if (Math.hypot(ball.vx, ball.vy) < 0.5) { 
-                    ball.vx = 0;
-                    ball.vy = 0;
-                    isMoving = false; 
-                    currentPlayer = (currentPlayer === 1) ? 2 : 1; 
-                    updateUI(); 
-                }
+            if (ball.y < ball.radius || ball.y > H - ball.radius) {
+                ball.vy *= -PHYSICS.wallBounce; ball.y = ball.y < ball.radius ? ball.radius : H-ball.radius;
             }
-        }
-
-        function draw() {
-            ctx.fillStyle = '#4e342e';
-            ctx.fillRect(0, 0, W, H);
             
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(15, 15, W-30, H-30);
-            
-            ctx.beginPath();
-            ctx.moveTo(W/2, 10);
-            ctx.lineTo(W/2, H-10);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(W/2, H/2, 60, 0, Math.PI*2);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(W/2, H/2, 30, 0, Math.PI*2);
-            ctx.stroke();
-
-            ctx.fillStyle = 'rgba(255,255,255,0.9)';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 20px "Segoe UI", Arial';
-            ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 30);
-            ctx.font = 'bold 18px "Segoe UI", Arial';
-            ctx.fillStyle = (currentPlayer === 1 && !isMoving) ? 'var(--p1)' : '#aaa';
-            ctx.fillText('JUGADOR 1', W*0.25, 45);
-            ctx.fillStyle = (currentPlayer === 2 && !isMoving) ? 'var(--p2)' : '#aaa';
-            ctx.fillText('JUGADOR 2', W*0.75, 45);
-
-            ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(-5, H/2-60, 30, 120);
-            ctx.strokeRect(W-25, H/2-60, 30, 120);
-            
-            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-            ctx.lineWidth = 1.5;
-            for(let i = -50; i <= 50; i+=15) {
-                ctx.beginPath();
-                ctx.moveTo(0, H/2 + i);
-                ctx.lineTo(25, H/2 + i);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(W-25, H/2 + i);
-                ctx.lineTo(W, H/2 + i);
-                ctx.stroke();
+            if (ball.x < 25 || ball.x > W - 25) {
+                if (ball.y > H/2 - 60 && ball.y < H/2 + 60) {
+                    if (ball.x < W/2) { score[1]++; currentPlayer = 1; } 
+                    else { score[0]++; currentPlayer = 2; }
+                    resetBallPosition(); return;
+                } else {
+                    ball.vx *= -PHYSICS.wallBounce; ball.x = ball.x < 25 ? 25 : W-25;
+                }
             }
 
             pins.forEach(p => {
-                ctx.fillStyle = '#1a1a1a';
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = '#555';
-                ctx.beginPath();
-                ctx.arc(p.x-1, p.y-1, 2, 0, Math.PI*2);
-                ctx.fill();
+                const dx = ball.x - p.x, dy = ball.y - p.y, d = Math.hypot(dx, dy);
+                if (d < ball.radius + PIN_RADIUS) {
+                    const ang = Math.atan2(dy, dx), s = Math.hypot(ball.vx, ball.vy);
+                    ball.vx = Math.cos(ang) * s * PHYSICS.pinBounce;
+                    ball.vy = Math.sin(ang) * s * PHYSICS.pinBounce;
+                    ball.x = p.x + Math.cos(ang) * (ball.radius + PIN_RADIUS + 1);
+                }
             });
 
-            if (isDragging && !isMoving && gameActive) {
-                const dx = ball.x - dragCurrent.x;
-                const dy = ball.y - dragCurrent.y;
-                const force = Math.min(Math.hypot(dx, dy), 100);
-                
-                ctx.beginPath();
-                ctx.strokeStyle = `rgba(255, 215, 0, ${0.4 + force/150})`;
-                ctx.setLineDash([6, 10]);
-                ctx.lineWidth = 3;
-                ctx.moveTo(ball.x, ball.y);
-                ctx.lineTo(ball.x + dx * 1.8, ball.y + dy * 1.8);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                ctx.fillStyle = `rgba(255, 215, 0, ${0.25 + force/200})`;
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, 18 + force/4, 0, Math.PI*2);
-                ctx.fill();
-                
-                ctx.fillStyle = '#ffd700';
-                ctx.font = 'bold 14px Arial';
-                ctx.fillText(`💪 ${Math.round(force)}%`, ball.x + 22, ball.y - 12);
-            }
-
-            drawMarble(ball);
-            update();
-            requestAnimationFrame(draw);
-        }
-
-        function startGame() {
-            const splash = document.getElementById('splash-screen');
-            splash.style.display = 'none';
-            
-            gameActive = true;
-            score = [0, 0];
-            currentPlayer = 1;
-            timeLeft = 60;
-            isMoving = false;
-            isDragging = false;
-            
-            updateUI();
-            resetBallPosition();
-            startTimer();
-            
-            setTimeout(() => {
-                const elem = document.documentElement;
-                if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
-                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            }, 100);
-        }
-
-        function startTimer() {
-            if(timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (!gameActive) return;
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    document.getElementById('timer').innerText = timeLeft;
-                    if (timeLeft <= 0) endGame();
-                }
-            }, 1000);
-        }
-
-        function resetBallPosition() {
-            isMoving = false;
-            isDragging = false;
-            ball.vx = 0;
-            ball.vy = 0;
-            ball.angle = 0;
-            ball.x = currentPlayer === 1 ? 65 : W - 65;
-            ball.y = H/2;
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('score1').innerText = score[0];
-            document.getElementById('score2').innerText = score[1];
-            const t = document.getElementById('turnText');
-            t.innerText = `🎯 Turno: J${currentPlayer}`;
-            t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
-            document.getElementById('timer').innerText = timeLeft;
-        }
-
-        function endGame() {
-            gameActive = false;
-            clearInterval(timerInterval);
-            const vig = document.getElementById('winnerVignette');
-            let winText = score[0] > score[1] ? "🏆 VICTORIA JUGADOR 1 🏆" : 
-                          (score[1] > score[0] ? "🏆 VICTORIA JUGADOR 2 🏆" : "🤝 EMPATE 🤝");
-            document.getElementById('winnerText').innerHTML = winText;
-            vig.style.display = 'flex';
-        }
-
-        function resetGame() {
-            if(timerInterval) clearInterval(timerInterval);
-            score = [0, 0];
-            currentPlayer = 1;
-            timeLeft = 60;
-            gameActive = true;
-            isMoving = false;
-            isDragging = false;
-            resetBallPosition();
-            updateUI();
-            startTimer();
-            document.getElementById('winnerVignette').style.display = 'none';
-        }
-
-        // ============ EVENTOS TÁCTILES ============
-        function onTouchStart(e) {
-            e.preventDefault();
-            if(isMoving || !gameActive) return;
-            
-            const touch = e.touches[0];
-            const coords = getCanvasCoords(touch.clientX, touch.clientY);
-            
-            if(Math.hypot(coords.x - ball.x, coords.y - ball.y) < 55) {
-                isDragging = true;
-                dragStart = coords;
-                dragCurrent = coords;
+            if (speed < 0.2) { 
+                isMoving = false; currentPlayer = (currentPlayer === 1) ? 2 : 1; 
+                updateUI(); 
             }
         }
-        
-        function onTouchMove(e) {
-            if(!isDragging || isMoving || !gameActive) return;
-            e.preventDefault();
-            
-            const touch = e.touches[0];
-            dragCurrent = getCanvasCoords(touch.clientX, touch.clientY);
-        }
-        
-        function onTouchEnd(e) {
-            e.preventDefault();
-            if(!isDragging || isMoving || !gameActive) {
-                isDragging = false;
-                return;
-            }
-            
-            const dx = ball.x - dragCurrent.x;
-            const dy = ball.y - dragCurrent.y;
-            const force = Math.min(Math.hypot(dx, dy), 100);
-            
-            if(force > 8) {
-                ball.vx = dx * PHYSICS.powerMult;
-                ball.vy = dy * PHYSICS.powerMult;
-                isMoving = true;
-            }
-            isDragging = false;
-        }
-        
-        function onMouseDown(e) {
-            e.preventDefault();
-            if(isMoving || !gameActive) return;
-            
-            const coords = getCanvasCoords(e.clientX, e.clientY);
-            if(Math.hypot(coords.x - ball.x, coords.y - ball.y) < 55) {
-                isDragging = true;
-                dragStart = coords;
-                dragCurrent = coords;
-            }
-        }
-        
-        function onMouseMove(e) {
-            if(!isDragging || isMoving || !gameActive) return;
-            e.preventDefault();
-            dragCurrent = getCanvasCoords(e.clientX, e.clientY);
-        }
-        
-        function onMouseUp(e) {
-            if(!isDragging || isMoving || !gameActive) {
-                isDragging = false;
-                return;
-            }
-            
-            const dx = ball.x - dragCurrent.x;
-            const dy = ball.y - dragCurrent.y;
-            const force = Math.min(Math.hypot(dx, dy), 100);
-            
-            if(force > 8) {
-                ball.vx = dx * PHYSICS.powerMult;
-                ball.vy = dy * PHYSICS.powerMult;
-                isMoving = true;
-            }
-            isDragging = false;
+    }
+
+    function draw() {
+        ctx.fillStyle = '#5d4037'; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 2;
+        ctx.strokeRect(15, 15, W-30, H-30);
+        ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.textAlign = 'center';
+        ctx.font = 'bold 26px Arial'; ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 45); 
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText('JUGADOR 1', W*0.25, 60); ctx.fillText('JUGADOR 2', W*0.75, 60);
+
+        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
+        ctx.strokeRect(-10, H/2-60, 35, 120); ctx.strokeRect(W-25, H/2-60, 35, 120);
+
+        pins.forEach(p => {
+            ctx.fillStyle = '#212121'; ctx.beginPath(); ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2); ctx.fill();
+        });
+
+        if (isDragging && !isMoving) {
+            ctx.beginPath(); ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)'; 
+            ctx.setLineDash([5,5]); ctx.lineWidth = 3;
+            ctx.moveTo(ball.x, ball.y); 
+            ctx.lineTo(ball.x + (ball.x - dragCurrent.x), ball.y + (ball.y - dragCurrent.y));
+            ctx.stroke(); ctx.setLineDash([]);
         }
 
-        function setupEvents() {
-            window.addEventListener('touchstart', onTouchStart, { passive: false });
-            window.addEventListener('touchmove', onTouchMove, { passive: false });
-            window.addEventListener('touchend', onTouchEnd);
-            window.addEventListener('touchcancel', onTouchEnd);
-            
-            canvas.addEventListener('mousedown', onMouseDown);
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mouseup', onMouseUp);
-            
-            canvas.addEventListener('dragstart', (e) => e.preventDefault());
-            canvas.addEventListener('selectstart', (e) => e.preventDefault());
-        }
+        drawMarble(ball); update(); requestAnimationFrame(draw);
+    }
 
-        function setupFullscreen() {
-            const btn = document.getElementById('fullscreenBtn');
-            if(btn) {
-                btn.addEventListener('click', () => {
-                    const elem = document.documentElement;
-                    if(elem.requestFullscreen) elem.requestFullscreen();
-                    else if(elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                });
-            }
-        }
+    function startGame() {
+        document.getElementById('splash-screen').style.display = 'none';
+        gameActive = true; startTimer();
+    }
 
-        function init() {
-            initField();
-            setupEvents();
-            setupFullscreen();
-            draw();
-            
-            document.getElementById('startBtn').onclick = startGame;
-            document.getElementById('resetGameBtn').onclick = resetGame;
-            document.getElementById('closeRotateBtn').onclick = () => {
-                document.getElementById('rotate-overlay').style.display = 'none';
-                document.querySelector('.game-wrapper').style.filter = 'none';
-                document.querySelector('.game-wrapper').style.pointerEvents = 'auto';
-            };
-            
-            updateUI();
-        }
+    function startTimer() {
+        if(timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            timeLeft--; document.getElementById('timer').innerText = timeLeft;
+            if (timeLeft <= 0) endGame();
+        }, 1000);
+    }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
+    function resetBallPosition() {
+        isMoving = false; ball.vx = 0; ball.vy = 0;
+        ball.x = currentPlayer === 1 ? 65 : W - 65; ball.y = H/2;
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('score1').innerText = score[0];
+        document.getElementById('score2').innerText = score[1];
+        const t = document.getElementById('turnText');
+        t.innerText = `Turno: J${currentPlayer}`;
+        t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
+    }
+
+    function endGame() {
+        gameActive = false; clearInterval(timerInterval);
+        const vig = document.getElementById('winnerVignette');
+        let win = score[0] > score[1] ? "¡VICTORIA J1!" : (score[1] > score[0] ? "¡VICTORIA J2!" : "¡EMPATE!");
+        document.getElementById('winnerText').innerText = win;
+        vig.style.display = 'flex';
+    }
+
+    function toggleFS() {
+        const elem = document.documentElement;
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(() => {});
         } else {
-            init();
+            document.exitFullscreen();
         }
-    })();
+    }
+
+    // EVENTOS CONSOLIDADOS
+    function handleDown(e) { 
+        if(isMoving || !gameActive) return; 
+        let c = getCoords(e);
+        if(Math.hypot(c.x - ball.x, c.y - ball.y) < 55) { isDragging = true; dragCurrent = c; } 
+    }
+    function handleMove(e) { if(isDragging) { dragCurrent = getCoords(e); e.preventDefault(); } }
+    function handleUp() { 
+        if(!isDragging) return; 
+        ball.vx = (ball.x - dragCurrent.x) * PHYSICS.powerMult; 
+        ball.vy = (ball.y - dragCurrent.y) * PHYSICS.powerMult; 
+        isDragging = false; isMoving = true; 
+    }
+
+    canvas.addEventListener('mousedown', handleDown);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    canvas.addEventListener('touchstart', handleDown, {passive:false});
+    window.addEventListener('touchmove', handleMove, {passive:false});
+    window.addEventListener('touchend', handleUp);
+
+    initField(); updateUI(); draw();
 </script>
 </body>
 </html>
