@@ -19,228 +19,97 @@
             touch-action: none;
         }
 
-        /* === PANTALLAS DE INTERFAZ === */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, #1b5e20, #0a0a0a);
-            color: white;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        #winnerVignette {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.97);
-            color: white;
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        /* === OVERLAY DE ROTACIÓN === */
+        /* === OVERLAY DE ROTACIÓN CORREGIDO (TAMAÑO LEGIBLE) === */
         #rotate-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            color: white;
-            z-index: 3000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); color: white; z-index: 5000;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px;
         }
+        
+        #rotate-overlay .icon { font-size: 80px; margin-bottom: 20px; }
+        #rotate-overlay p { font-size: 24px; font-weight: bold; margin-bottom: 10px; color: white; }
+        #rotate-overlay span { font-size: 16px; opacity: 0.8; margin-bottom: 30px; display: block; }
         
         #rotate-overlay button {
-            margin-top: 30px;
-            padding: 15px 40px;
-            background: var(--gold);
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 18px;
-            cursor: pointer;
-            min-width: 200px;
+            padding: 18px 40px; background: var(--gold);
+            border: none; border-radius: 50px; font-weight: bold;
+            font-size: 18px; cursor: pointer; color: black;
+            box-shadow: 0 4px 15px rgba(251, 192, 45, 0.4);
         }
 
-        h1 { color: var(--gold); margin: 20px 0; font-size: clamp(24px, 6vw, 42px); }
-        
-        /* === CONTENEDOR PRINCIPAL RESPONSIVO === */
-        .game-wrapper {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #0a0a0a;
+        /* Mostrar solo en vertical */
+        @media (orientation: portrait) { #rotate-overlay { display: flex; } }
+
+        /* === PANTALLAS DE INTERFAZ === */
+        #splash-screen, #winnerVignette {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; z-index: 2000;
         }
+
+        #splash-screen { background: radial-gradient(circle, #1b5e20, #0a0a0a); color: white; }
+        #winnerVignette { background: rgba(0,0,0,0.97); color: white; display: none; z-index: 2500; }
+
+        h1 { color: var(--gold); margin: 20px 0; font-size: clamp(28px, 7vw, 48px); text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
+        .game-wrapper { width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
 
         .game-container {
-            display: flex;
-            flex-direction: column;
-            width: 98%;
-            height: 98%;
-            max-width: 1200px;
-            background: #3e2723;
-            padding: 12px;
-            border-radius: 20px;
-            border: 3px solid #5d4037;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
+            width: 98%; height: 98%; max-width: 1200px;
+            background: #3e2723; padding: 12px; border-radius: 20px;
+            border: 3px solid #5d4037; position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
         .ui-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            color: #fff;
-            width: 100%;
-            flex-shrink: 0;
-            gap: 15px;
-            padding: 0 5px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; color: #fff; width: 100%; flex-shrink: 0; gap: 15px;
         }
 
         .stat-box {
-            background: #2d1b18;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            border: 1px solid #5d4037;
-            font-size: clamp(14px, 3vh, 20px);
-            min-width: 100px;
-            text-align: center;
-            white-space: nowrap;
+            background: #2d1b18; padding: 10px 20px; border-radius: 40px;
+            font-weight: bold; border: 1px solid #5d4037;
+            font-size: clamp(14px, 4vh, 22px); min-width: 100px; text-align: center;
         }
 
-        .turn {
-            transition: 0.3s;
-            min-width: 140px;
-        }
-        
+        .turn { transition: 0.3s; min-width: 140px; }
         .p1-active { background: var(--p1); box-shadow: 0 0 15px var(--p1); }
         .p2-active { background: var(--p2); box-shadow: 0 0 15px var(--p2); }
 
-        /* === ÁREA DE JUEGO === */
         .canvas-wrapper {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #2a1a15;
-            border-radius: 15px;
-            overflow: hidden;
-            min-height: 0;
+            flex: 1; position: relative; display: flex; justify-content: center;
+            align-items: center; background: #2a1a15; border-radius: 15px; overflow: hidden;
         }
 
-        canvas {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            background: #bcaaa4;
-            border-radius: 10px;
-            cursor: crosshair;
-            touch-action: none;
-        }
+        canvas { max-width: 100%; max-height: 100%; object-fit: contain; background: #bcaaa4; cursor: crosshair; }
 
-        /* === BARRA DE CONTROLES CORREGIDA (no se desborda) === */
-        .control-bar {
-            display: flex;
-            gap: 15px;
-            margin-top: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            flex-shrink: 0;
-        }
+        .control-bar { display: flex; gap: 15px; margin-top: 10px; justify-content: center; flex-shrink: 0; }
 
         .btn {
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 40px;
-            border: none;
-            background: var(--gold);
-            color: #000;
-            transition: transform 0.1s;
-            font-family: inherit;
-            min-width: 120px;
-            white-space: nowrap;
-        }
-        
-        .btn:active { transform: scale(0.96); }
-
-        /* Branding en fondo */
-        .watermark {
-            position: absolute;
-            bottom: 10px;
-            right: 15px;
-            font-size: 10px;
-            color: rgba(255,255,255,0.25);
-            z-index: 1;
-            pointer-events: none;
-            font-family: monospace;
-        }
-
-        @media (orientation: portrait) {
-            #rotate-overlay { display: flex; }
-        }
-
-        /* Responsive para pantallas muy pequeñas */
-        @media (max-width: 600px) {
-            .stat-box { padding: 5px 10px; font-size: 11px; }
-            .turn { min-width: 95px; }
-            .btn { padding: 8px 12px; font-size: 11px; min-width: 95px; }
-            .control-bar { gap: 8px; }
-            .watermark { font-size: 8px; bottom: 5px; right: 8px; }
-        }
-        
-        @media (max-height: 500px) {
-            .ui-top { margin-bottom: 5px; }
-            .control-bar { margin-top: 6px; }
-            .stat-box { padding: 4px 8px; font-size: 10px; }
-            .btn { padding: 5px 10px; font-size: 10px; min-width: 85px; }
+            padding: 12px 28px; font-size: 15px; font-weight: bold; cursor: pointer;
+            border-radius: 40px; border: none; background: var(--gold); color: #000;
+            min-width: 140px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
 
-<!-- OVERLAY DE ROTACIÓN -->
 <div id="rotate-overlay">
-    <div style="font-size: 70px;">🔄</div>
-    <p style="margin: 20px; font-size: 22px; font-weight: bold;">GIRA TU DISPOSITIVO</p>
-    <p style="margin-bottom: 10px; font-size: 16px;">a horizontal para mejor experiencia</p>
-    <button id="ignoreRotateBtn">CONTINUAR ASÍ</button>
+    <div class="icon">🔄</div>
+    <p>GIRA TU DISPOSITIVO</p>
+    <span>Usa el modo horizontal para jugar mejor</span>
+    <button onclick="document.getElementById('rotate-overlay').style.display='none'">CONTINUAR ASÍ</button>
 </div>
 
-<!-- PANTALLA DE INICIO -->
 <div id="splash-screen">
-    <div style="font-size: 14px; letter-spacing: 3px;">BIENVENIDOS A</div>
+    <div style="font-size: 14px; letter-spacing: 4px; opacity: 0.8;">BIENVENIDOS A</div>
     <h1>ENTRENA CONSULTING SAS</h1>
-    <p style="margin-bottom: 30px; font-size: 18px;">Expertos en Seguridad y Salud en el Trabajo</p>
-    <button class="btn" id="startBtn" style="font-size: 20px; padding: 15px 45px;">▶ INICIAR DUELO</button>
+    <p style="margin-bottom: 40px; font-size: 20px; opacity: 0.9;">Expertos en Seguridad y Salud en el Trabajo</p>
+    <button class="btn" onclick="startGame()" style="font-size: 22px; padding: 18px 50px;">▶ INICIAR DUELO</button>
 </div>
 
-<!-- CONTENEDOR PRINCIPAL DEL JUEGO -->
 <div class="game-wrapper">
     <div class="game-container">
         <div class="ui-top">
@@ -254,528 +123,228 @@
         </div>
 
         <div class="control-bar">
-            <button class="btn" id="fullscreenBtn">⛶ Pantalla completa</button>
-            <button class="btn" id="resetGameBtn">🔄 Reiniciar</button>
+            <button class="btn" onclick="toggleFS()">⛶ Pantalla completa</button>
+            <button class="btn" onclick="location.reload()">🔄 Reiniciar</button>
         </div>
 
-        <div class="watermark">ENTRENA CONSULTING SAS • SST</div>
-
         <div id="winnerVignette">
-            <h2 id="winnerText" style="font-size: 45px; color: var(--gold); margin-bottom: 20px;"></h2>
-            <p style="margin-bottom: 30px; font-size: 18px;">Entrena Consulting SAS - Expertos en SST</p>
-            <button class="btn" id="playAgainBtn">🎮 JUGAR DE NUEVO</button>
+            <h2 id="winnerText" style="font-size: 48px; color: var(--gold); margin-bottom: 20px;"></h2>
+            <p style="margin-bottom: 30px; font-size: 20px; opacity: 0.8;">Entrena Consulting SAS - SST</p>
+            <button class="btn" onclick="location.reload()" style="font-size: 20px; padding: 15px 40px;">🎮 JUGAR DE NUEVO</button>
         </div>
     </div>
 </div>
 
 <script>
-    (function() {
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const W = 800, H = 520;
+(function() {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = 800, H = 520;
 
-        const PHYSICS = { friction: 0.988, wallBounce: 0.65, pinBounce: 0.82, powerMult: 0.15 };
+    const PHYSICS = { friction: 0.988, wallBounce: 0.65, pinBounce: 0.82, powerMult: 0.15 };
+    const COLORS = { p1: '#d32f2f', p2: '#1976d2', gold: '#fbc02d' };
+    
+    let score = [0, 0], currentPlayer = 1, timeLeft = 60, isMoving = false, gameActive = false;
+    let timerInterval = null, isDragging = false, dragCurrent = { x: 0, y: 0 };
+
+    let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
+    const pins = [];
+    const PIN_RADIUS = 8;
+
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
+        const cy = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: Math.min(Math.max(0, (cx - rect.left) * (W / rect.width)), W),
+            y: Math.min(Math.max(0, (cy - rect.top) * (H / rect.height)), H)
+        };
+    }
+
+    function initField() {
+        pins.length = 0;
+        const createFormation = (dir) => {
+            const baseX = dir === 1 ? W * 0.1 : W * 0.9;
+            const s = dir === 1 ? 75 : -75;
+            pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); 
+            [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s, y: H * p }));
+            [0.3, 0.5, 0.7].forEach(p => pins.push({ x: baseX + s * 2.5, y: H * p }));
+            pins.push({ x: baseX + s * 3.8, y: H/2 });
+            [0.38, 0.62].forEach(p => pins.push({ x: baseX + s * 5.2, y: H * p }));
+        };
+        createFormation(1); createFormation(-1);
+    }
+
+    function drawMarble(b) {
+        ctx.save(); ctx.translate(b.x, b.y);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath();
+        ctx.arc(b.vx * 0.5, b.vy * 0.5 + 4, b.radius, 0, Math.PI * 2); ctx.fill();
+
+        ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+        let g = ctx.createRadialGradient(-4, -4, 0, 0, 0, b.radius);
+        g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#80cbc4');
+        ctx.fillStyle = g; ctx.fill();
+
+        ctx.rotate(b.angle);
+        const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
+        tricolor.forEach((col, i) => {
+            ctx.save(); ctx.rotate((Math.PI * 2 / 3) * i);
+            ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(b.radius * 0.7, -b.radius * 0.5, b.radius * 0.7, b.radius * 0.5, 0, 0);
+            ctx.fill(); ctx.restore();
+        });
+        ctx.restore();
         
-        let score = [0, 0];
-        let currentPlayer = 1;
-        let timeLeft = 60;
-        let isMoving = false;
-        let gameActive = false;
-        let timerInterval = null;
-        
-        // Variables de arrastre
-        let isDragging = false;
-        let dragCurrent = { x: 0, y: 0 };
+        ctx.save(); ctx.translate(b.x, b.y);
+        let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 2, 0, 0, b.radius);
+        shine.addColorStop(0, 'rgba(255,255,255,0.8)'); shine.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = shine; ctx.beginPath(); ctx.arc(0, 0, b.radius - 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
 
-        let ball = { x: 65, y: H/2, vx: 0, vy: 0, radius: 14, angle: 0 };
-        const pins = [];
-        const PIN_RADIUS = 8;
+    function update() {
+        if (!gameActive) return;
+        if (isMoving) {
+            const speed = Math.hypot(ball.vx, ball.vy);
+            ball.angle += speed * 0.1;
+            ball.x += ball.vx; ball.y += ball.vy;
+            ball.vx *= PHYSICS.friction; ball.vy *= PHYSICS.friction;
 
-        // Colores fijos (evitando CSS variables en canvas)
-        const COLOR_P1 = '#d32f2f';
-        const COLOR_P2 = '#1976d2';
-        const COLOR_GOLD = '#fbc02d';
-
-        // ============ FUNCIONES DE UTILIDAD ============
-        function getCanvasCoords(clientX, clientY) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = W / rect.width;
-            const scaleY = H / rect.height;
-            
-            let x = (clientX - rect.left) * scaleX;
-            let y = (clientY - rect.top) * scaleY;
-            
-            return { 
-                x: Math.min(Math.max(0, x), W), 
-                y: Math.min(Math.max(0, y), H) 
-            };
-        }
-
-        function getCoordsFromEvent(e) {
-            let clientX, clientY;
-            
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
+            if (ball.y < ball.radius || ball.y > H - ball.radius) {
+                ball.vy *= -PHYSICS.wallBounce; ball.y = ball.y < ball.radius ? ball.radius : H-ball.radius;
             }
             
-            return getCanvasCoords(clientX, clientY);
-        }
-
-        // ============ INICIALIZAR PINOS ============
-        function initField() {
-            pins.length = 0;
-            const createFormation = (dir) => {
-                const baseX = dir === 1 ? W * 0.1 : W * 0.9;
-                const s = dir === 1 ? 75 : -75;
-                pins.push({ x: dir === 1 ? 25 : W-25, y: H/2 }); 
-                [0.2, 0.4, 0.6, 0.8].forEach(p => pins.push({ x: baseX + s, y: H * p }));
-                [0.3, 0.5, 0.7].forEach(p => pins.push({ x: baseX + s * 2.5, y: H * p }));
-                pins.push({ x: baseX + s * 3.8, y: H/2 });
-                [0.38, 0.62].forEach(p => pins.push({ x: baseX + s * 5.2, y: H * p }));
-            };
-            createFormation(1); 
-            createFormation(-1);
-        }
-
-        // ============ DIBUJAR CANICA TRICOLOR CON CURVAS MEJORADAS ============
-        function drawMarble(b) {
-            ctx.save();
-            ctx.translate(b.x, b.y);
-            
-            // Sombra
-            ctx.fillStyle = 'rgba(0,0,0,0.25)';
-            ctx.beginPath();
-            ctx.arc(b.vx * 0.5, b.vy * 0.5 + 4, b.radius, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Base blanca
-            ctx.beginPath();
-            ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
-            let g = ctx.createRadialGradient(-4, -4, 0, 0, 0, b.radius);
-            g.addColorStop(0, '#ffffff');
-            g.addColorStop(0.5, '#e0f2f1');
-            g.addColorStop(1, '#80cbc4');
-            ctx.fillStyle = g;
-            ctx.fill();
-
-            // Bandera Tricolor de Colombia con curvas Bézier mejoradas
-            ctx.rotate(b.angle);
-            const tricolor = [COLOR_GOLD, COLOR_P2, COLOR_P1]; // Amarillo, Azul, Rojo
-            tricolor.forEach((col, i) => {
-                ctx.save();
-                ctx.rotate((Math.PI * 2 / 3) * i);
-                ctx.fillStyle = col;
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                // Curvas más realistas para imitar la imagen "trébol"
-                ctx.quadraticCurveTo(b.radius * 0.7, -b.radius * 0.5, b.radius * 0.95, 0);
-                ctx.quadraticCurveTo(b.radius * 0.7, b.radius * 0.5, 0, 0);
-                ctx.fill();
-                ctx.restore();
-            });
-
-            ctx.restore();
-            
-            // Brillo
-            ctx.save();
-            ctx.translate(b.x, b.y);
-            let shine = ctx.createRadialGradient(-b.radius/3, -b.radius/3, 2, 0, 0, b.radius);
-            shine.addColorStop(0, 'rgba(255,255,255,0.8)');
-            shine.addColorStop(1, 'rgba(255,255,255,0)');
-            ctx.fillStyle = shine;
-            ctx.beginPath();
-            ctx.arc(0, 0, b.radius - 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-
-        // ============ ACTUALIZAR FÍSICA CON REGLA DE GOL CORREGIDA ============
-        function update() {
-            if (!gameActive) return;
-            
-            if (isMoving) {
-                const speed = Math.hypot(ball.vx, ball.vy);
-                ball.angle += speed * 0.1;
-                ball.x += ball.vx;
-                ball.y += ball.vy;
-                ball.vx *= PHYSICS.friction;
-                ball.vy *= PHYSICS.friction;
-
-                // Bordes superior e inferior
-                if (ball.y < ball.radius) {
-                    ball.vy = Math.abs(ball.vy) * PHYSICS.wallBounce;
-                    ball.y = ball.radius;
-                }
-                if (ball.y > H - ball.radius) {
-                    ball.vy = -Math.abs(ball.vy) * PHYSICS.wallBounce;
-                    ball.y = H - ball.radius;
-                }
-                
-                // Detección de goles con REGLA CORREGIDA
-                const goalZone = 70;
-                const isGoalLeft = (ball.x < 30 && Math.abs(ball.y - H/2) < goalZone);
-                const isGoalRight = (ball.x > W - 30 && Math.abs(ball.y - H/2) < goalZone);
-                
-                if (isGoalLeft) {
-                    // Gol en portería izquierda - Anota jugador 2
-                    score[1]++;
-                    // REGLA: El que recibe el gol (jugador 1) saca
-                    currentPlayer = 1;
-                    updateUI();
-                    resetBallPosition();
-                    return; // IMPORTANTE: Evita el cambio automático de turno
-                }
-                if (isGoalRight) {
-                    // Gol en portería derecha - Anota jugador 1
-                    score[0]++;
-                    // REGLA: El que recibe el gol (jugador 2) saca
-                    currentPlayer = 2;
-                    updateUI();
-                    resetBallPosition();
-                    return; // IMPORTANTE: Evita el cambio automático de turno
-                }
-                
-                // Paredes laterales (fuera de portería)
-                if (ball.x < ball.radius) {
-                    ball.vx = Math.abs(ball.vx) * PHYSICS.wallBounce;
-                    ball.x = ball.radius;
-                }
-                if (ball.x > W - ball.radius) {
-                    ball.vx = -Math.abs(ball.vx) * PHYSICS.wallBounce;
-                    ball.x = W - ball.radius;
-                }
-
-                // Colisión con pinos
-                pins.forEach(p => {
-                    const dx = ball.x - p.x;
-                    const dy = ball.y - p.y;
-                    const d = Math.hypot(dx, dy);
-                    if (d < ball.radius + PIN_RADIUS) {
-                        const ang = Math.atan2(dy, dx);
-                        const currentSpeed = Math.hypot(ball.vx, ball.vy);
-                        ball.vx = Math.cos(ang) * currentSpeed * PHYSICS.pinBounce;
-                        ball.vy = Math.sin(ang) * currentSpeed * PHYSICS.pinBounce;
-                        const overlap = (ball.radius + PIN_RADIUS) - d;
-                        ball.x += Math.cos(ang) * overlap;
-                        ball.y += Math.sin(ang) * overlap;
-                    }
-                });
-
-                // Detener movimiento - Cambia turno al otro jugador (solo si no hubo gol)
-                if (Math.hypot(ball.vx, ball.vy) < 0.5) { 
-                    ball.vx = 0;
-                    ball.vy = 0;
-                    isMoving = false; 
-                    currentPlayer = (currentPlayer === 1) ? 2 : 1; 
-                    updateUI(); 
-                }
+            const goalZone = 70;
+            if (ball.x < 30 && Math.abs(ball.y - H/2) < goalZone) {
+                score[1]++; currentPlayer = 1; resetBallPosition(); return;
             }
-        }
-
-        // ============ DIBUJAR TODO ============
-        function draw() {
-            // Fondo de la cancha
-            ctx.fillStyle = '#4e342e';
-            ctx.fillRect(0, 0, W, H);
-            
-            // Textura de césped
-            ctx.fillStyle = '#5d4037';
-            for(let i = 0; i < 200; i++) {
-                ctx.fillRect(Math.random() * W, Math.random() * H, 2, 1);
+            if (ball.x > W - 30 && Math.abs(ball.y - H/2) < goalZone) {
+                score[0]++; currentPlayer = 2; resetBallPosition(); return;
             }
             
-            // Líneas de la cancha
-            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(15, 15, W-30, H-30);
-            
-            ctx.beginPath();
-            ctx.moveTo(W/2, 10);
-            ctx.lineTo(W/2, H-10);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(W/2, H/2, 60, 0, Math.PI*2);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(W/2, H/2, 30, 0, Math.PI*2);
-            ctx.stroke();
-
-            // Textos de branding y jugadores (usando colores fijos, no CSS variables)
-            ctx.fillStyle = 'rgba(255,255,255,0.85)';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 22px "Segoe UI", Arial';
-            ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 35);
-            ctx.font = 'bold 18px "Segoe UI", Arial';
-            
-            // CORREGIDO: usar valores hexadecimales directos
-            ctx.fillStyle = (currentPlayer === 1 && !isMoving) ? COLOR_P1 : '#aaaaaa';
-            ctx.fillText('JUGADOR 1', W*0.25, 50);
-            ctx.fillStyle = (currentPlayer === 2 && !isMoving) ? COLOR_P2 : '#aaaaaa';
-            ctx.fillText('JUGADOR 2', W*0.75, 50);
-
-            // Porterías con red
-            ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(-5, H/2-60, 30, 120);
-            ctx.strokeRect(W-25, H/2-60, 30, 120);
-            
-            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-            ctx.lineWidth = 1.5;
-            for(let i = -50; i <= 50; i+=15) {
-                ctx.beginPath();
-                ctx.moveTo(0, H/2 + i);
-                ctx.lineTo(25, H/2 + i);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(W-25, H/2 + i);
-                ctx.lineTo(W, H/2 + i);
-                ctx.stroke();
+            if (ball.x < ball.radius || ball.x > W - ball.radius) {
+                ball.vx *= -PHYSICS.wallBounce; ball.x = ball.x < ball.radius ? ball.radius : W-ball.radius;
             }
 
-            // Pinos
             pins.forEach(p => {
-                ctx.fillStyle = '#1a1a1a';
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = '#555';
-                ctx.beginPath();
-                ctx.arc(p.x-1, p.y-1, 2, 0, Math.PI*2);
-                ctx.fill();
+                const dx = ball.x - p.x, dy = ball.y - p.y, d = Math.hypot(dx, dy);
+                if (d < ball.radius + PIN_RADIUS) {
+                    const ang = Math.atan2(dy, dx), s = Math.hypot(ball.vx, ball.vy);
+                    ball.vx = Math.cos(ang) * s * PHYSICS.pinBounce;
+                    ball.vy = Math.sin(ang) * s * PHYSICS.pinBounce;
+                    const overlap = (ball.radius + PIN_RADIUS) - d;
+                    ball.x += Math.cos(ang) * overlap; ball.y += Math.sin(ang) * overlap;
+                }
             });
 
-            // Indicador de arrastre
-            if (isDragging && !isMoving && gameActive) {
-                const dx = ball.x - dragCurrent.x;
-                const dy = ball.y - dragCurrent.y;
-                const force = Math.min(Math.hypot(dx, dy), 100);
-                
-                ctx.beginPath();
-                ctx.strokeStyle = `rgba(255, 215, 0, ${0.4 + force/150})`;
-                ctx.setLineDash([6, 10]);
-                ctx.lineWidth = 3;
-                ctx.moveTo(ball.x, ball.y);
-                ctx.lineTo(ball.x + dx * 1.8, ball.y + dy * 1.8);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                ctx.fillStyle = `rgba(255, 215, 0, ${0.25 + force/200})`;
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, 18 + force/4, 0, Math.PI*2);
-                ctx.fill();
-                
-                ctx.fillStyle = COLOR_GOLD;
-                ctx.font = 'bold 14px Arial';
-                ctx.fillText(`💪 ${Math.round(force)}%`, ball.x + 22, ball.y - 12);
-            }
-
-            drawMarble(ball);
-            update();
-            requestAnimationFrame(draw);
-        }
-
-        // ============ FUNCIONES DEL JUEGO ============
-        function startGame() {
-            const splash = document.getElementById('splash-screen');
-            splash.style.display = 'none';
-            
-            gameActive = true;
-            score = [0, 0];
-            currentPlayer = 1;
-            timeLeft = 60;
-            isMoving = false;
-            isDragging = false;
-            
-            updateUI();
-            resetBallPosition();
-            startTimer();
-        }
-
-        function startTimer() {
-            if(timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (!gameActive) return;
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    document.getElementById('timer').innerText = timeLeft;
-                    if (timeLeft <= 0) endGame();
-                }
-            }, 1000);
-        }
-
-        function resetBallPosition() {
-            isMoving = false;
-            isDragging = false;
-            ball.vx = 0;
-            ball.vy = 0;
-            ball.angle = 0;
-            // El balón se coloca en la portería del jugador que va a sacar
-            ball.x = currentPlayer === 1 ? 65 : W - 65;
-            ball.y = H/2;
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('score1').innerText = score[0];
-            document.getElementById('score2').innerText = score[1];
-            const t = document.getElementById('turnText');
-            t.innerText = `🎯 Turno: J${currentPlayer}`;
-            t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
-            document.getElementById('timer').innerText = timeLeft;
-        }
-
-        function endGame() {
-            gameActive = false;
-            clearInterval(timerInterval);
-            const vig = document.getElementById('winnerVignette');
-            let winText = score[0] > score[1] ? "🏆 VICTORIA JUGADOR 1 🏆" : 
-                          (score[1] > score[0] ? "🏆 VICTORIA JUGADOR 2 🏆" : "🤝 EMPATE 🤝");
-            document.getElementById('winnerText').innerHTML = winText;
-            vig.style.display = 'flex';
-        }
-
-        function resetGame() {
-            if(timerInterval) clearInterval(timerInterval);
-            score = [0, 0];
-            currentPlayer = 1;
-            timeLeft = 60;
-            gameActive = true;
-            isMoving = false;
-            isDragging = false;
-            resetBallPosition();
-            updateUI();
-            startTimer();
-            document.getElementById('winnerVignette').style.display = 'none';
-        }
-
-        function toggleFullscreen() {
-            const elem = document.documentElement;
-            if (!document.fullscreenElement) {
-                elem.requestFullscreen().catch(() => {});
-            } else {
-                document.exitFullscreen();
+            if (speed < 0.5) { 
+                ball.vx = 0; ball.vy = 0; isMoving = false; 
+                currentPlayer = (currentPlayer === 1) ? 2 : 1; updateUI(); 
             }
         }
+    }
 
-        // ============ EVENTOS TÁCTILES Y RATÓN ============
-        function onTouchStart(e) {
-            e.preventDefault();
-            if(isMoving || !gameActive) return;
-            
-            const coords = getCoordsFromEvent(e);
-            if(Math.hypot(coords.x - ball.x, coords.y - ball.y) < 55) {
-                isDragging = true;
-                dragCurrent = coords;
-            }
-        }
+    function draw() {
+        ctx.fillStyle = '#4e342e'; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 2;
+        ctx.strokeRect(15, 15, W-30, H-30);
+        ctx.beginPath(); ctx.moveTo(W/2, 10); ctx.lineTo(W/2, H-10); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
         
-        function onTouchMove(e) {
-            if(!isDragging || isMoving || !gameActive) return;
-            e.preventDefault();
-            dragCurrent = getCoordsFromEvent(e);
-        }
+        ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.textAlign = 'center';
+        ctx.font = 'bold 22px Arial'; ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 35);
+        ctx.font = 'bold 18px Arial';
+        ctx.fillStyle = (currentPlayer === 1 && !isMoving) ? COLORS.p1 : '#aaa';
+        ctx.fillText('JUGADOR 1', W*0.25, 50);
+        ctx.fillStyle = (currentPlayer === 2 && !isMoving) ? COLORS.p2 : '#aaa';
+        ctx.fillText('JUGADOR 2', W*0.75, 50);
+
+        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
+        ctx.strokeRect(-5, H/2-60, 30, 120); ctx.strokeRect(W-25, H/2-60, 30, 120);
         
-        function onTouchEnd(e) {
-            e.preventDefault();
-            if(!isDragging || isMoving || !gameActive) {
-                isDragging = false;
-                return;
-            }
-            
-            const dx = ball.x - dragCurrent.x;
-            const dy = ball.y - dragCurrent.y;
-            const force = Math.min(Math.hypot(dx, dy), 100);
-            
-            if(force > 8) {
-                ball.vx = dx * PHYSICS.powerMult;
-                ball.vy = dy * PHYSICS.powerMult;
-                isMoving = true;
-            }
-            isDragging = false;
-        }
-        
-        function onMouseDown(e) {
-            e.preventDefault();
-            if(isMoving || !gameActive) return;
-            
-            const coords = getCoordsFromEvent(e);
-            if(Math.hypot(coords.x - ball.x, coords.y - ball.y) < 55) {
-                isDragging = true;
-                dragCurrent = coords;
-            }
-        }
-        
-        function onMouseMove(e) {
-            if(!isDragging || isMoving || !gameActive) return;
-            e.preventDefault();
-            dragCurrent = getCoordsFromEvent(e);
-        }
-        
-        function onMouseUp(e) {
-            if(!isDragging || isMoving || !gameActive) {
-                isDragging = false;
-                return;
-            }
-            
-            const dx = ball.x - dragCurrent.x;
-            const dy = ball.y - dragCurrent.y;
-            const force = Math.min(Math.hypot(dx, dy), 100);
-            
-            if(force > 8) {
-                ball.vx = dx * PHYSICS.powerMult;
-                ball.vy = dy * PHYSICS.powerMult;
-                isMoving = true;
-            }
-            isDragging = false;
+        pins.forEach(p => {
+            ctx.fillStyle = '#1a1a1a'; ctx.beginPath(); ctx.arc(p.x, p.y, PIN_RADIUS, 0, Math.PI*2); ctx.fill();
+        });
+
+        if (isDragging && !isMoving && gameActive) {
+            const dx = ball.x - dragCurrent.x, dy = ball.y - dragCurrent.y, force = Math.min(Math.hypot(dx, dy), 100);
+            ctx.beginPath(); ctx.strokeStyle = `rgba(255, 215, 0, ${0.4 + force/150})`;
+            ctx.setLineDash([6, 10]); ctx.lineWidth = 3;
+            ctx.moveTo(ball.x, ball.y); ctx.lineTo(ball.x + dx * 1.8, ball.y + dy * 1.8);
+            ctx.stroke(); ctx.setLineDash([]);
         }
 
-        function setupEvents() {
-            // Touch events (globales para capturar fuera del canvas)
-            window.addEventListener('touchstart', onTouchStart, { passive: false });
-            window.addEventListener('touchmove', onTouchMove, { passive: false });
-            window.addEventListener('touchend', onTouchEnd);
-            window.addEventListener('touchcancel', onTouchEnd);
-            
-            // Mouse events
-            canvas.addEventListener('mousedown', onMouseDown);
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mouseup', onMouseUp);
-            
-            // Prevenir comportamientos por defecto
-            canvas.addEventListener('dragstart', (e) => e.preventDefault());
-            canvas.addEventListener('selectstart', (e) => e.preventDefault());
-        }
+        drawMarble(ball); update(); requestAnimationFrame(draw);
+    }
 
-        // ============ INICIALIZACIÓN ============
-        function init() {
-            initField();
-            setupEvents();
-            draw();
-            
-            // Botones
-            document.getElementById('startBtn').onclick = startGame;
-            document.getElementById('resetGameBtn').onclick = resetGame;
-            document.getElementById('fullscreenBtn').onclick = toggleFullscreen;
-            document.getElementById('playAgainBtn').onclick = () => location.reload();
-            document.getElementById('ignoreRotateBtn').onclick = () => {
-                document.getElementById('rotate-overlay').style.display = 'none';
-            };
-            
-            updateUI();
-        }
+    window.startGame = function() {
+        document.getElementById('splash-screen').style.display = 'none';
+        gameActive = true; score = [0, 0]; currentPlayer = 1; timeLeft = 60;
+        resetBallPosition(); startTimer();
+    };
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-    })();
+    function startTimer() {
+        if(timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            if (timeLeft > 0) { timeLeft--; document.getElementById('timer').innerText = timeLeft; }
+            else endGame();
+        }, 1000);
+    }
+
+    function resetBallPosition() {
+        isMoving = false; isDragging = false; ball.vx = 0; ball.vy = 0;
+        ball.x = currentPlayer === 1 ? 65 : W - 65; ball.y = H/2; updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('score1').innerText = score[0];
+        document.getElementById('score2').innerText = score[1];
+        const t = document.getElementById('turnText');
+        t.innerText = `🎯 Turno: J${currentPlayer}`;
+        t.className = `stat-box turn ${currentPlayer === 1 ? 'p1-active' : 'p2-active'}`;
+    }
+
+    function endGame() {
+        gameActive = false; clearInterval(timerInterval);
+        const vig = document.getElementById('winnerVignette');
+        vig.querySelector('h2').innerText = score[0] > score[1] ? "🏆 VICTORIA J1" : (score[1] > score[0] ? "🏆 VICTORIA J2" : "EMPATE");
+        vig.style.display = 'flex';
+    }
+
+    window.toggleFS = function() {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+        else document.exitFullscreen();
+    };
+
+    canvas.addEventListener('mousedown', (e) => {
+        if(isMoving || !gameActive) return;
+        const c = getCoords(e);
+        if(Math.hypot(c.x - ball.x, c.y - ball.y) < 55) { isDragging = true; dragCurrent = c; }
+    });
+    window.addEventListener('mousemove', (e) => { if(isDragging) dragCurrent = getCoords(e); });
+    window.addEventListener('mouseup', () => {
+        if(!isDragging) return;
+        const dx = ball.x - dragCurrent.x, dy = ball.y - dragCurrent.y;
+        if(Math.hypot(dx, dy) > 8) { ball.vx = dx * PHYSICS.powerMult; ball.vy = dy * PHYSICS.powerMult; isMoving = true; }
+        isDragging = false;
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+        if(isMoving || !gameActive) return;
+        const c = getCoords(e);
+        if(Math.hypot(c.x - ball.x, c.y - ball.y) < 55) { isDragging = true; dragCurrent = c; }
+    }, {passive: false});
+    window.addEventListener('touchmove', (e) => { if(isDragging) { e.preventDefault(); dragCurrent = getCoords(e); } }, {passive: false});
+    window.addEventListener('touchend', () => {
+        if(!isDragging) return;
+        const dx = ball.x - dragCurrent.x, dy = ball.y - dragCurrent.y;
+        if(Math.hypot(dx, dy) > 8) { ball.vx = dx * PHYSICS.powerMult; ball.vy = dy * PHYSICS.powerMult; isMoving = true; }
+        isDragging = false;
+    });
+
+    initField(); updateUI(); draw();
+})();
 </script>
 </body>
 </html>
