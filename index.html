@@ -52,7 +52,7 @@
             text-align: center;
         }
 
-        /* === OVERLAY DE ROTACIÓN MEJORADO (BOTÓN IGNORAR) === */
+        /* === OVERLAY DE ROTACIÓN === */
         #rotate-overlay {
             position: fixed;
             top: 0;
@@ -162,6 +162,7 @@
             touch-action: none;
         }
 
+        /* === BARRA DE CONTROLES CORREGIDA (no se desborda) === */
         .control-bar {
             display: flex;
             gap: 15px;
@@ -172,8 +173,8 @@
         }
 
         .btn {
-            padding: 12px 28px;
-            font-size: 15px;
+            padding: 10px 20px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             border-radius: 40px;
@@ -182,7 +183,8 @@
             color: #000;
             transition: transform 0.1s;
             font-family: inherit;
-            min-width: 130px;
+            min-width: 120px;
+            white-space: nowrap;
         }
         
         .btn:active { transform: scale(0.96); }
@@ -190,10 +192,10 @@
         /* Branding en fondo */
         .watermark {
             position: absolute;
-            bottom: 15px;
-            right: 20px;
-            font-size: 11px;
-            color: rgba(255,255,255,0.3);
+            bottom: 10px;
+            right: 15px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.25);
             z-index: 1;
             pointer-events: none;
             font-family: monospace;
@@ -203,17 +205,26 @@
             #rotate-overlay { display: flex; }
         }
 
-        @media (max-width: 768px) {
-            .stat-box { padding: 6px 12px; font-size: 12px; }
-            .turn { min-width: 110px; }
-            .btn { padding: 10px 20px; font-size: 13px; min-width: 110px; }
-            .control-bar { gap: 10px; }
+        /* Responsive para pantallas muy pequeñas */
+        @media (max-width: 600px) {
+            .stat-box { padding: 5px 10px; font-size: 11px; }
+            .turn { min-width: 95px; }
+            .btn { padding: 8px 12px; font-size: 11px; min-width: 95px; }
+            .control-bar { gap: 8px; }
+            .watermark { font-size: 8px; bottom: 5px; right: 8px; }
+        }
+        
+        @media (max-height: 500px) {
+            .ui-top { margin-bottom: 5px; }
+            .control-bar { margin-top: 6px; }
+            .stat-box { padding: 4px 8px; font-size: 10px; }
+            .btn { padding: 5px 10px; font-size: 10px; min-width: 85px; }
         }
     </style>
 </head>
 <body>
 
-<!-- OVERLAY DE ROTACIÓN CON BOTÓN IGNORAR -->
+<!-- OVERLAY DE ROTACIÓN -->
 <div id="rotate-overlay">
     <div style="font-size: 70px;">🔄</div>
     <p style="margin: 20px; font-size: 22px; font-weight: bold;">GIRA TU DISPOSITIVO</p>
@@ -280,6 +291,11 @@
         const pins = [];
         const PIN_RADIUS = 8;
 
+        // Colores fijos (evitando CSS variables en canvas)
+        const COLOR_P1 = '#d32f2f';
+        const COLOR_P2 = '#1976d2';
+        const COLOR_GOLD = '#fbc02d';
+
         // ============ FUNCIONES DE UTILIDAD ============
         function getCanvasCoords(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
@@ -325,7 +341,7 @@
             createFormation(-1);
         }
 
-        // ============ DIBUJAR CANICA TRICOLOR CON ROTACIÓN ============
+        // ============ DIBUJAR CANICA TRICOLOR CON CURVAS MEJORADAS ============
         function drawMarble(b) {
             ctx.save();
             ctx.translate(b.x, b.y);
@@ -336,7 +352,7 @@
             ctx.arc(b.vx * 0.5, b.vy * 0.5 + 4, b.radius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Base
+            // Base blanca
             ctx.beginPath();
             ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
             let g = ctx.createRadialGradient(-4, -4, 0, 0, 0, b.radius);
@@ -346,17 +362,18 @@
             ctx.fillStyle = g;
             ctx.fill();
 
-            // Bandas tricolor de Colombia con rotación física
+            // Bandera Tricolor de Colombia con curvas Bézier mejoradas
             ctx.rotate(b.angle);
-            const tricolor = ['#fbc02d', '#1976d2', '#d32f2f']; 
+            const tricolor = [COLOR_GOLD, COLOR_P2, COLOR_P1]; // Amarillo, Azul, Rojo
             tricolor.forEach((col, i) => {
                 ctx.save();
                 ctx.rotate((Math.PI * 2 / 3) * i);
                 ctx.fillStyle = col;
                 ctx.beginPath();
                 ctx.moveTo(0, 0);
-                ctx.quadraticCurveTo(b.radius * 0.65, -b.radius * 0.4, b.radius * 0.95, 0);
-                ctx.quadraticCurveTo(b.radius * 0.65, b.radius * 0.4, 0, 0);
+                // Curvas más realistas para imitar la imagen "trébol"
+                ctx.quadraticCurveTo(b.radius * 0.7, -b.radius * 0.5, b.radius * 0.95, 0);
+                ctx.quadraticCurveTo(b.radius * 0.7, b.radius * 0.5, 0, 0);
                 ctx.fill();
                 ctx.restore();
             });
@@ -376,7 +393,7 @@
             ctx.restore();
         }
 
-        // ============ ACTUALIZAR FÍSICA ============
+        // ============ ACTUALIZAR FÍSICA CON REGLA DE GOL CORREGIDA ============
         function update() {
             if (!gameActive) return;
             
@@ -398,7 +415,7 @@
                     ball.y = H - ball.radius;
                 }
                 
-                // Detección de goles con REGLA DE SAQUE DE META
+                // Detección de goles con REGLA CORREGIDA
                 const goalZone = 70;
                 const isGoalLeft = (ball.x < 30 && Math.abs(ball.y - H/2) < goalZone);
                 const isGoalRight = (ball.x > W - 30 && Math.abs(ball.y - H/2) < goalZone);
@@ -406,20 +423,20 @@
                 if (isGoalLeft) {
                     // Gol en portería izquierda - Anota jugador 2
                     score[1]++;
-                    // REGLA: El que recibe el gol (jugador 1) saca desde su portería
+                    // REGLA: El que recibe el gol (jugador 1) saca
                     currentPlayer = 1;
                     updateUI();
                     resetBallPosition();
-                    return;
+                    return; // IMPORTANTE: Evita el cambio automático de turno
                 }
                 if (isGoalRight) {
                     // Gol en portería derecha - Anota jugador 1
                     score[0]++;
-                    // REGLA: El que recibe el gol (jugador 2) saca desde su portería
+                    // REGLA: El que recibe el gol (jugador 2) saca
                     currentPlayer = 2;
                     updateUI();
                     resetBallPosition();
-                    return;
+                    return; // IMPORTANTE: Evita el cambio automático de turno
                 }
                 
                 // Paredes laterales (fuera de portería)
@@ -448,7 +465,7 @@
                     }
                 });
 
-                // Detener movimiento - Cambia turno al otro jugador
+                // Detener movimiento - Cambia turno al otro jugador (solo si no hubo gol)
                 if (Math.hypot(ball.vx, ball.vy) < 0.5) { 
                     ball.vx = 0;
                     ball.vy = 0;
@@ -489,15 +506,17 @@
             ctx.arc(W/2, H/2, 30, 0, Math.PI*2);
             ctx.stroke();
 
-            // Textos de branding y jugadores
+            // Textos de branding y jugadores (usando colores fijos, no CSS variables)
             ctx.fillStyle = 'rgba(255,255,255,0.85)';
             ctx.textAlign = 'center';
             ctx.font = 'bold 22px "Segoe UI", Arial';
             ctx.fillText('ENTRENA CONSULTING SAS', W/2, H - 35);
             ctx.font = 'bold 18px "Segoe UI", Arial';
-            ctx.fillStyle = (currentPlayer === 1 && !isMoving) ? 'var(--p1)' : '#aaa';
+            
+            // CORREGIDO: usar valores hexadecimales directos
+            ctx.fillStyle = (currentPlayer === 1 && !isMoving) ? COLOR_P1 : '#aaaaaa';
             ctx.fillText('JUGADOR 1', W*0.25, 50);
-            ctx.fillStyle = (currentPlayer === 2 && !isMoving) ? 'var(--p2)' : '#aaa';
+            ctx.fillStyle = (currentPlayer === 2 && !isMoving) ? COLOR_P2 : '#aaaaaa';
             ctx.fillText('JUGADOR 2', W*0.75, 50);
 
             // Porterías con red
@@ -551,7 +570,7 @@
                 ctx.arc(ball.x, ball.y, 18 + force/4, 0, Math.PI*2);
                 ctx.fill();
                 
-                ctx.fillStyle = '#ffd700';
+                ctx.fillStyle = COLOR_GOLD;
                 ctx.font = 'bold 14px Arial';
                 ctx.fillText(`💪 ${Math.round(force)}%`, ball.x + 22, ball.y - 12);
             }
