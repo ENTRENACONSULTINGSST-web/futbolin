@@ -47,6 +47,9 @@
             border-radius: 20px; padding: 5px 18px; font-size: 12px;
             color: #90caf9; margin-bottom: 22px; letter-spacing: 1px;
         }
+        /* Garantiza que el splash y sus hijos reciben eventos touch */
+        #splash-screen { touch-action: manipulation; }
+        #splash-screen * { touch-action: manipulation; }
 
         /* ── GANADOR ── */
         #winnerVignette {
@@ -182,6 +185,8 @@
             cursor: pointer; border-radius: 40px; border: none;
             background: var(--gold); color: #000; transition: transform .1s;
             font-family: inherit; min-width: 120px; white-space: nowrap;
+            touch-action: manipulation; /* permite tap en móvil aunque body tenga touch-action:none */
+            -webkit-tap-highlight-color: rgba(251,192,45,0.3);
         }
         .btn:active { transform: scale(.95); }
 
@@ -333,7 +338,10 @@
         };
     }
     function getCoordsFromEvent(e) {
-        const src = e.touches ? e.touches[0] : e;
+        // touchend: touches[] está vacío — usar changedTouches[0]
+        const src = e.changedTouches ? e.changedTouches[0]
+                  : e.touches        ? e.touches[0]
+                  : e;
         return getCanvasCoords(src.clientX, src.clientY);
     }
 
@@ -697,10 +705,13 @@
     //  EVENTOS — idénticos a index-1.html
     // ═══════════════════════════════════════════════════
     function onTouchStart(e) {
-        e.preventDefault();
         if (isMoving || !gameActive) return;
         const c = getCoordsFromEvent(e);
-        if (Math.hypot(c.x - ball.x, c.y - ball.y) < 55) { isDragging = true; dragCurrent = c; }
+        if (Math.hypot(c.x - ball.x, c.y - ball.y) < 55) {
+            e.preventDefault(); // solo prevenir si toca la canica
+            isDragging = true;
+            dragCurrent = c;
+        }
     }
     function onTouchMove(e) {
         if (!isDragging || isMoving || !gameActive) return;
@@ -739,10 +750,13 @@
     }
 
     function setupEvents() {
-        window.addEventListener('touchstart',  onTouchStart, { passive: false });
+        // Touch: start/end en canvas para no interferir con botones del DOM
+        // move en window para capturar arrastre fuera del canvas
+        canvas.addEventListener('touchstart',  onTouchStart, { passive: false });
         window.addEventListener('touchmove',   onTouchMove,  { passive: false });
-        window.addEventListener('touchend',    onTouchEnd);
-        window.addEventListener('touchcancel', onTouchEnd);
+        canvas.addEventListener('touchend',    onTouchEnd,   { passive: false });
+        canvas.addEventListener('touchcancel', onTouchEnd,   { passive: false });
+        // Mouse
         canvas.addEventListener('mousedown', onMouseDown);
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup',   onMouseUp);
@@ -828,7 +842,9 @@ Escribe 2-3 oraciones de análisis, tono deportivo profesional, menciona Entrena
         initField();
         setupEvents();
         draw();
-        document.getElementById('startBtn').onclick       = startGame;
+        const startBtn = document.getElementById('startBtn');
+        startBtn.addEventListener('click',      startGame);
+        startBtn.addEventListener('touchend',   function(e){ e.preventDefault(); e.stopPropagation(); startGame(); }, { passive: false });
         document.getElementById('resetGameBtn').onclick   = resetGame;
         document.getElementById('fullscreenBtn').onclick  = toggleFullscreen;
         document.getElementById('playAgainBtn').onclick   = () => location.reload();
