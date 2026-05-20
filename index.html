@@ -87,11 +87,12 @@
             font-weight: bold; font-size: clamp(14px, 4vw, 18px);
             cursor: pointer; min-width: 180px; touch-action: manipulation;
         }
-        /* Portrait: mostrar overlay, ocultar el resto */
+        /* Portrait: mostrar overlay, ocultar solo el juego */
         @media (orientation: portrait) {
             #rotate-overlay { display: flex; }
             .game-wrapper   { display: none; }
-            #splash-screen  { display: none; }
+            /* #splash-screen NUNCA se oculta por CSS —
+               se controla solo desde JS al hacer clic en INICIAR */
         }
 
         /* ── LAYOUT ── */
@@ -804,13 +805,12 @@ Escribe 2-3 oraciones de análisis, tono deportivo profesional, menciona Entrena
         document.getElementById('fullscreenBtn').onclick  = toggleFullscreen;
         document.getElementById('playAgainBtn').onclick   = () => location.reload();
         document.getElementById('ignoreRotateBtn').onclick = () => {
-            const ov = document.getElementById('rotate-overlay');
-            ov.style.display = 'none';
-            // Restaurar visibilidad del juego al ignorar rotación
+            document.getElementById('rotate-overlay').style.display = 'none';
             document.querySelector('.game-wrapper').style.display = 'flex';
-            // Si el splash aún no se cerró, mostrarlo
+            // Restaurar splash incondicionalmente si el juego aún no inició
+            // gameActive === false significa que startGame() nunca se llamó
             const splash = document.getElementById('splash-screen');
-            if (splash.style.display !== 'none') splash.style.display = 'flex';
+            if (!gameActive) splash.style.display = 'flex';
         };
         updateUI();
     }
