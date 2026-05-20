@@ -7,6 +7,9 @@
     <meta property="og:title" content="Futbolín Tricolor – Entrena Consulting SAS">
     <meta property="og:description" content="¡Duelo de Futbolín con comentarista IA! Expertos en SST.">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="https://gsst-web.github.io/og-preview.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <title>Futbolín Tricolor - Entrena Consulting SAS</title>
     <style>
         /* ── FIX #1: variables CSS solo para HTML, NUNCA en canvas ctx ── */
@@ -23,6 +26,8 @@
             position: fixed;
             width: 100%; height: 100%;
             touch-action: none;
+            /* Fix mobile WebView height */
+            min-height: -webkit-fill-available;
         }
 
         /* ── SPLASH ── */
@@ -61,17 +66,33 @@
         /* ── ROTATE OVERLAY ── */
         #rotate-overlay {
             position: fixed; inset: 0;
-            background: rgba(0,0,0,.95); color: white;
+            background: #0a0a0a; color: white;
             z-index: 3000; display: none;
             flex-direction: column; justify-content: center;
             align-items: center; text-align: center;
+            padding: 30px; gap: 12px;
+            /* Garantiza que ocupa TODO en portrait */
+            width: 100vw; height: 100vh;
+            min-height: -webkit-fill-available;
         }
+        #rotate-overlay .rot-icon {
+            font-size: clamp(50px, 15vw, 80px);
+            animation: tilt 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes tilt { from { transform: rotate(0deg); } to { transform: rotate(85deg); } }
+        #rotate-overlay p { font-size: clamp(14px, 4vw, 22px); line-height: 1.4; }
         #rotate-overlay button {
-            margin-top: 30px; padding: 15px 40px;
+            margin-top: 20px; padding: 14px 36px;
             background: var(--gold); border: none; border-radius: 50px;
-            font-weight: bold; font-size: 18px; cursor: pointer; min-width: 200px;
+            font-weight: bold; font-size: clamp(14px, 4vw, 18px);
+            cursor: pointer; min-width: 180px; touch-action: manipulation;
         }
-        @media (orientation: portrait) { #rotate-overlay { display: flex; } }
+        /* Portrait: mostrar overlay, ocultar el resto */
+        @media (orientation: portrait) {
+            #rotate-overlay { display: flex; }
+            .game-wrapper   { display: none; }
+            #splash-screen  { display: none; }
+        }
 
         /* ── LAYOUT ── */
         .game-wrapper {
@@ -191,10 +212,10 @@
 
 <!-- ROTATE OVERLAY -->
 <div id="rotate-overlay">
-    <div style="font-size:70px;">🔄</div>
-    <p style="margin:20px;font-size:22px;font-weight:bold;">GIRA TU DISPOSITIVO</p>
-    <p style="font-size:16px;">a horizontal para mejor experiencia</p>
-    <button id="ignoreRotateBtn">CONTINUAR ASÍ</button>
+    <div class="rot-icon">🔄</div>
+    <p><strong>GIRA TU DISPOSITIVO</strong></p>
+    <p style="opacity:.7;font-size:clamp(12px,3vw,16px);">a horizontal para mejor experiencia</p>
+    <button id="ignoreRotateBtn" style="touch-action:manipulation;">CONTINUAR ASÍ</button>
 </div>
 
 <!-- SPLASH -->
@@ -783,7 +804,13 @@ Escribe 2-3 oraciones de análisis, tono deportivo profesional, menciona Entrena
         document.getElementById('fullscreenBtn').onclick  = toggleFullscreen;
         document.getElementById('playAgainBtn').onclick   = () => location.reload();
         document.getElementById('ignoreRotateBtn').onclick = () => {
-            document.getElementById('rotate-overlay').style.display = 'none';
+            const ov = document.getElementById('rotate-overlay');
+            ov.style.display = 'none';
+            // Restaurar visibilidad del juego al ignorar rotación
+            document.querySelector('.game-wrapper').style.display = 'flex';
+            // Si el splash aún no se cerró, mostrarlo
+            const splash = document.getElementById('splash-screen');
+            if (splash.style.display !== 'none') splash.style.display = 'flex';
         };
         updateUI();
     }
